@@ -134,7 +134,7 @@ Returns the port for NGINX Prometheus Exporter
 {{/*
 Returns the full ingress host.
 */}}
-{{- define "ingress.host" -}}
+{{- define "nginx.ingress.host" -}}
 {{- $fullName := include "nginx.fullname" . -}}
 {{- if .Values.ingress.host }}
     {{- .Values.ingress.host -}}
