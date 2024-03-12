@@ -7,7 +7,7 @@
       [
         "@semantic-release/exec",
         {
-          "prepareCmd": "sed -i \"s/^version:.*/version: $NEW_VERSION/\" helm/Chart.yaml ${nextRelease.version}"
+          "prepareCmd": "sed -i \"s/^version:.*/version: ${nextRelease.version}/\" helm/Chart.yaml ${nextRelease.version}"
         }
       ],
       ["@semantic-release/git", {

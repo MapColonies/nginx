@@ -22,11 +22,6 @@ jobs:
       - name: Install Dependencies
         run: npm install -g semantic-release @semantic-release/changelog @semantic-release/git @semantic-release/exec
 
-      - name: Set up Helm
-        uses: Azure/setup-helm@v1
-        with:
-          version: 'v3.12.0'
-
       - name: Semantic Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
