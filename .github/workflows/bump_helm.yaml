@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - '*'  # Adjust the branch as needed
+      - 'master'
 
 jobs:
   bump_version:
@@ -24,6 +24,37 @@ jobs:
 
       - name: Semantic Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx semantic-release
+
+      - name: Set up Helm
+        uses: Azure/setup-helm@v1
+        with:
+          version: 'v3.12.0'          
+
+      - name: Login to registry
+        run: |
+          helm registry login ${{ secrets.ACR_URL }} --username ${{ secrets.ACR_PUSH_USER }} --password ${{ secrets.ACR_PUSH_TOKEN }} 
+
+      - name: Get chart's name
+        run: |
+          export "CHART=$(cat Chart.yaml | grep name | awk '{print $2; exit}')"
+          echo "CHART=$CHART" >> $GITHUB_ENV
+        working-directory: ./helm
+
+      - name: Get chart's version 
+        run: |
+          export "VER=$(cat Chart.yaml | grep version | awk '{print $2; exit}')"
+          echo "VER=$VER" >> $GITHUB_ENV
+        working-directory: ./helm    
+
+      - name: Package chart into tgz file
+        run: |
+          helm package . --dependency-update 
+        working-directory: ./helm
+
+      - name: Publish chart to ACR
+        run: |
+          helm push ${{ env.CHART }}-${{ env.VER }}.tgz oci://${{ secrets.ACR_URL }}/helm
+        working-directory: ./helm
