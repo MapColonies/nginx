@@ -1,6 +1,6 @@
 {
   "branches": [
-    "add_helm_ci"
+    "master"
   ],
   "plugins": [
     "@semantic-release/commit-analyzer",

@@ -27,6 +27,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npx semantic-release
+
       - name: Set up Helm
         uses: Azure/setup-helm@v1
         with:
@@ -34,7 +35,8 @@ jobs:
 
       - name: Login to registry
         run: |
-          helm registry login ${{ secrets.ACR_URL }} --username ${{ secrets.ACR_PUSH_USER }} --password ${{ secrets.ACR_PUSH_TOKEN }} 
+          helm registry login ${{ secrets.ACR_URL }} --username ${{ secrets.ACR_PUSH_USER }} --password ${{ secrets.ACR_PUSH_TOKEN }}
+
       - name: Package chart into tgz file
         run: |
           helm package . --dependency-update
