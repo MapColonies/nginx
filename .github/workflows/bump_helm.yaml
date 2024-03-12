@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main  # Adjust the branch as needed
+      - '*'  # Adjust the branch as needed
 
 jobs:
   bump_version:
