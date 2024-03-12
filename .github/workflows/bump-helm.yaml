@@ -1,0 +1,50 @@
+name: Bump Helm Chart Version
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  bump_version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install -g semantic-release @semantic-release/commit-analyzer @semantic-release/changelog @semantic-release/git @semantic-release/exec
+
+      - name: Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx semantic-release
+
+      - name: Set up Helm
+        uses: Azure/setup-helm@v1
+        with:
+          version: 'v3.12.0'
+
+      - name: Login to registry
+        run: |
+          helm registry login ${{ secrets.ACR_URL }} --username ${{ secrets.ACR_PUSH_USER }} --password ${{ secrets.ACR_PUSH_TOKEN }}
+
+      - name: Package chart into tgz file
+        run: |
+          helm package . --dependency-update
+        working-directory: ./helm
+
+      - name: Publish chart to ACR
+        run: |
+          export "CHART_NAME=$(helm show chart helm/ | grep '^name:' | awk '{print $2}')"
+          export "CHART_VERSION=$(helm show chart helm/ | grep '^version:' | awk '{print $2}')"
+          helm push ${{ env.CHART_NAME }}-${{ env.CHART_VERSION }}.tgz oci://${{ secrets.ACR_URL }}/helm
+        working-directory: ./helm

@@ -1,0 +1,27 @@
+{
+  "branches": [
+    "master"
+  ],
+  "plugins": [
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator",
+    "@semantic-release/changelog",
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "sed -i \"s/^version:.*/version: ${nextRelease.version}/\" helm/Chart.yaml" 
+      }
+    ],
+    [
+      "@semantic-release/git",
+      {
+        "assets": [
+          "CHANGELOG.md",
+          "helm/Chart.yaml"
+        ],
+        "message": "chore(release): ${nextRelease.version}"
+      }
+    ],
+    "@semantic-release/github"
+  ]
+}
