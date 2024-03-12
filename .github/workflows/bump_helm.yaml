@@ -1,0 +1,24 @@
+name: Bump Helm Chart Version
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main  # Adjust the branch as needed
+
+jobs:
+  bump_version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Helm
+        uses: Azure/setup-helm@v1
+        with:
+          version: 'v3.12.0'
+
+      - name: Semantic Release
+        run: |
+          npx semantic-release
