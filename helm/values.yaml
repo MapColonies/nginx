@@ -8,6 +8,7 @@ global:
 
 enabled: true
 environment: development
+splunkIndex: ''
 replicaCount: 1
 initialDelaySeconds: 60
 resetOnConfigChange: true
