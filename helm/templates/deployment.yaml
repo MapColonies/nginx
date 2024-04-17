@@ -48,7 +48,7 @@ spec:
             {{ tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
           {{- end }}
       containers:
-        - name: nginx-container
+        - name: {{ $fullName | quote }}
           {{- with .Values.image }}
           image: {{ $cloudProviderDockerRegistryUrl }}{{ .repository }}:{{ .tag }}
           {{- end }}
