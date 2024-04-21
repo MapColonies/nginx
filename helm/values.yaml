@@ -100,12 +100,13 @@ authorization:
 
 route:
   enabled: true
-  path: /
-  host: 
+  routesMapping: 
+    - path: /
+      host: 
   timeout:
     enabled: false # defaults to 30s by openshift
     duration: 60s # supported units (us, ms, s, m, h, d)
-  rewriteTarget: ''
+  rewriteTarget: 'f'
   tls:
     enabled: true
     termination: edge
