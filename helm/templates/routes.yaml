@@ -1,9 +1,8 @@
-{{- if .Values.enabled }}
 {{- $chartName := include "nginx.name" . -}}
 {{- $fullName := include "nginx.fullname" . -}}
 {{- $cloudProviderFlavor := include "nginx.cloudProviderFlavor" . -}}
 {{- $route := .Values.route -}}
-{{- if and (eq $cloudProviderFlavor "openshift") (.Values.route.enabled) -}}
+{{- if and (and (.Values.enabled) (eq $cloudProviderFlavor "openshift")) (.Values.route.enabled) -}}
 {{- range $index, $routesMapping := $route.routesMapping }}
 apiVersion: route.openshift.io/v1
 kind: Route
@@ -40,6 +39,5 @@ spec:
     caCertificate: {{ $route.tls.caCertificate | quote }}
     {{- end }}
   {{- end -}}
-{{- end -}}
 {{- end -}}
 {{- end -}}
