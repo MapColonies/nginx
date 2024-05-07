@@ -33,5 +33,5 @@ jobs:
         run: npx semantic-release
       
   push_helm_artifact_to_registry:
-    uses: MapColonies/shared-workflows/.github/workflows/build-and-push-helm.yaml@master
+    uses: MapColonies/shared-workflows/.github/workflows/build-and-push-helm.yaml@remove_permissions
     secrets: inherit      
