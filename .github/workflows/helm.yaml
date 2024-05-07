@@ -32,6 +32,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
       
-  Push artifacts to registry:
+  push_helm_artifact_to_registry:
     uses: MapColonies/shared-workflows/.github/workflows/build-and-push-helm.yaml@master
     secrets: inherit      
