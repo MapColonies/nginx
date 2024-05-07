@@ -27,7 +27,10 @@ jobs:
           node-version: "lts/*"
       - name: Install dependencies
         run: npm i -g semantic-release @semantic-release/changelog @semantic-release/exec @semantic-release/git
-      - name: Release
+      - name: Semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
+      - name: Push artifacts to registry
+          uses: MapColonies/shared-workflows/.github/workflows/build-and-push-helm.yaml@master
+          secrets: inherit      
