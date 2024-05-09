@@ -36,7 +36,7 @@ jobs:
           ACR_URL: ${{ secrets.ACR_URL }}
           ACR_PUSH_USER: ${{ secrets.ACR_PUSH_USER }}
           ACR_PUSH_TOKEN: ${{ secrets.ACR_PUSH_TOKEN }}
-        working-directory: ./helm
+          WORKDIR: helm
         run: |
             chmod +x ./build-and-push-helm.sh
             ./build-and-push-helm.sh
