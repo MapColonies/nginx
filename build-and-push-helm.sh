@@ -4,4 +4,4 @@ helm registry login $ACR_URL --username $ACR_PUSH_USER --password $ACR_PUSH_TOKE
 CHART_NAME=$(cat Chart.yaml | grep name | awk '{print $2; exit}')
 CHART_VERSION=$(cat Chart.yaml | grep version | awk '{print $2; exit}')
 helm package --dependency-update .
-helm push $CHART_NAME-$CHART_VERSION.tgz oci://$ACR_URL/helm"
+helm push $CHART_NAME-$CHART_VERSION.tgz oci://$ACR_URL/helm
