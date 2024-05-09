@@ -32,4 +32,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
       - name: Build and push helm chart
-        run: ./build-and-push-helm.sh
+        run: |
+            chmod +x ./build-and-push-helm.sh
+            ./build-and-push-helm.sh
