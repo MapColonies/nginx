@@ -1,45 +1,15 @@
-name: Release
+name: Match chart version and push to ACR
+
 on:
   push:
     branches:
-      - '*'
+      - "*"
 
 permissions:
-  contents: read # for checkout
+  contents: write
+  pull-requests: write
 
 jobs:
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write # to be able to publish a GitHub release
-      issues: write # to be able to comment on released issues
-      pull-requests: write # to be able to comment on released pull requests
-      id-token: write # to enable use of OIDC for npm provenance
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "lts/*"
-      - name: Install dependencies
-        run: npm i -g semantic-release @semantic-release/changelog @semantic-release/exec @semantic-release/git
-      - name: Semantic-release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
-      - name: Build and push helm chart
-        env:
-          ACR_URL: ${{ secrets.ACR_URL }}
-          ACR_PUSH_USER: ${{ secrets.ACR_PUSH_USER }}
-          ACR_PUSH_TOKEN: ${{ secrets.ACR_PUSH_TOKEN }}
-        working-directory: helm
-        run: |
-          helm registry login ${{ secrets.ACR_URL }} --username ${{ secrets.ACR_PUSH_USER }} --password ${{ secrets.ACR_PUSH_TOKEN }}
-          CHART_NAME=$(cat Chart.yaml | grep name | awk '{print $2; exit}')
-          CHART_VERSION=$(cat Chart.yaml | grep version | awk '{print $2; exit}')
-          helm package --dependency-update .
-          helm push $CHART_NAME-$CHART_VERSION.tgz oci://$ACR_URL/helm
+  build_and_push_docker:
+    uses: MapColonies/shared-workflows/.github/workflows/release-and-push-helm@remove_permissions
+    secrets: inherit
