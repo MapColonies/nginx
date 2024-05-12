@@ -11,5 +11,5 @@ permissions:
 
 jobs:
   build_and_push_docker:
-    uses: MapColonies/shared-workflows/.github/workflows/release-and-push-helm@remove_permissions
+    uses: MapColonies/shared-workflows/.github/workflows/release-and-push-helm.yaml@remove_permissions
     secrets: inherit
