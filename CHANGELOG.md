@@ -1,3 +1,11 @@
+# [1.1.0](https://github.com/MapColonies/nginx/compare/v1.0.0...v1.1.0) (2024-05-12)
+
+
+### Features
+
+* breaking ([423cccc](https://github.com/MapColonies/nginx/commit/423cccc62b23f48dd23c500ee28971ec92ac17b6))
+* breaking ([0b26d04](https://github.com/MapColonies/nginx/commit/0b26d049017ca406d998db717cc6194a3a6bb15c))
+
 # 1.0.0 (2024-05-12)
 
 
