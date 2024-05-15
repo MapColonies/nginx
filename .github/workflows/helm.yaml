@@ -14,9 +14,3 @@ jobs:
   release_helm_and_push:
     uses: MapColonies/shared-workflows/.github/workflows/release-and-push-helm.yaml@master
     secrets: inherit
-
-  build_and_push_docker:
-    uses: MapColonies/shared-workflows/.github/workflows/build-and-push-docker.yaml@master
-    secrets: inherit
-    with:
-      context: docker-image    
