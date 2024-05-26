@@ -38,6 +38,7 @@ spec:
     key: {{ $route.tls.key | quote }}
     caCertificate: {{ $route.tls.caCertificate | quote }}
     {{- end }}
-  {{- end -}}
-{{- end -}}
+  {{- end }}
+{{ printf "---" }}
+{{- end }}
 {{- end -}}
