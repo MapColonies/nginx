@@ -10,12 +10,12 @@ fi
 # Navigate to the charts directory
 cd ../helm
 
-# Run helm-docs for each chart
-for chart in */; do
-    if [ -d "$chart" ]; then
-        echo "Generating docs for $chart"
-        helm-docs --chart-search-root="./$chart" --template-files=VALUES.md.gotmpl --output-file=VALUES.md
-    fi
-done
+# # Run helm-docs for each chart
+# for chart in */; do
+#     if [ -d "$chart" ]; then
+#         echo "Generating docs for $chart"
+#         helm-docs --chart-search-root="./$chart" --template-files=VALUES.md.gotmpl --output-file=VALUES.md
+#     fi
+# done
 
 echo "Helm documentation updated successfully!"
