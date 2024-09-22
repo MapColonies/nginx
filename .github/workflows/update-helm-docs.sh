@@ -15,7 +15,7 @@ cd ../../helm
 # for chart in */; do
 #     if [ -d "$chart" ]; then
 #         echo "Generating docs for $chart"
-#         helm-docs --chart-search-root="./$chart" --template-files=VALUES.md.gotmpl --output-file=VALUES.md
+helm-docs --chart-search-root="." --template-files=VALUES.md.gotmpl --output-file=VALUES.md
 #     fi
 # done
 
