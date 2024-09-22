@@ -78,12 +78,32 @@ resources:
 # -- Use this property in order to add custom annotations to the Pod
 additionalPodAnnotations: {}
 
+# Add extra volumes to the Deployment, for example
+# - name: nginx-config
+#   configMap:
+#    name: 'nginx-extra-configmap'
+#
 # -- List of extra volumes that are added to the Deployment
 extraVolumes: []
 
+# Add extra volumeMounts to the Pod, for example
+# - name: nginx-config
+#   mountPath: "/etc/nginx/conf.d/default.conf"
+#   subPath: default.conf
+#
 # -- List of extra volumeMounts that are added to the NGINX container
 extraVolumeMounts: []
 
+# Add side car to the Deployment, for example
+# sidecars: |-
+#   - name: envoy
+#     image: "{{ .Values.envoy.image }}:{{ .Values.envoy.imageTag }}"
+#     volumeMounts: []
+#     args: []
+#     ports: []
+#     resources:
+#     {{- toYaml .Values.envoy.resources.value | nindent 12 }}
+#
 # -- String consists of a list of sidecars containers that are added to the Deployment
 sidecars: ''
 
