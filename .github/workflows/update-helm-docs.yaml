@@ -1,13 +1,10 @@
 name: Update Helm Docs
 
 on:
+  workflow_disptach:
   push:
     branches:
-      - helm-docs
-    paths:
-      - 'helm/**'
-      
-  workflow_dispatch:
+      - '*'
 
 jobs:
   update-helm-docs:
