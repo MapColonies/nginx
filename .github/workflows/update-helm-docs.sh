@@ -9,7 +9,7 @@ fi
 
 # Navigate to the charts directory
 pwd
-cd ./helm
+cd ../../helm
 
 # # Run helm-docs for each chart
 # for chart in */; do
