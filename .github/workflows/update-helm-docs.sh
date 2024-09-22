@@ -8,7 +8,7 @@ if ! command -v helm-docs &>/dev/null; then
 fi
 
 # Navigate to the charts directory
-cd ../helm
+cd ./helm
 
 # # Run helm-docs for each chart
 # for chart in */; do
