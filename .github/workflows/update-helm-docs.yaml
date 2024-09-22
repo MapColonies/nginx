@@ -22,18 +22,18 @@ jobs:
       run: |
         pwd
         ll
-        chmod +x ./update-helm-docs.sh
-        ./update-helm-docs.sh
+      # chmod +x ./update-helm-docs.sh
+      # ./update-helm-docs.sh
 
-    - name: Commit changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git add .
-        git diff --quiet && git diff --staged --quiet || git commit -m "Update Helm documentation"
+    # - name: Commit changes
+    #   run: |
+    #     git config --local user.email "action@github.com"
+    #     git config --local user.name "GitHub Action"
+    #     git add .
+    #     git diff --quiet && git diff --staged --quiet || git commit -m "Update Helm documentation"
 
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: ${{ github.ref }}
+    # - name: Push changes
+    #   uses: ad-m/github-push-action@master
+    #   with:
+    #     github_token: ${{ secrets.GITHUB_TOKEN }}
+    #     branch: ${{ github.ref }}
