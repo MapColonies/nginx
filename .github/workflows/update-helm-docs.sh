@@ -15,10 +15,9 @@ cd ../../helm
 # for chart in */; do
 #     if [ -d "$chart" ]; then
 #         echo "Generating docs for $chart"
-helm-docs --chart-search-root="." --template-files=VALUES.md.gotmpl --output-file=README.md
+helm-docs --chart-search-root="." --template-files=VALUES.md.gotmpl --output-file=../README.md
 #     fi
 # done
 
-mv README.md ../
 
 echo "Helm documentation updated successfully!"
