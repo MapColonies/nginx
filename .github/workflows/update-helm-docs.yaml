@@ -1,9 +1,7 @@
 name: Update Helm Docs
 
 on:
-  push:
-    paths:
-      - 'helm/**'
+  workflow_dispatch:
 
 jobs:
   update-helm-docs:
