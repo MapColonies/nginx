@@ -20,8 +20,6 @@ jobs:
 
     - name: Run helm-docs
       run: |
-        pwd
-        ls -a
         cd .github/workflows
         chmod +x ./update-helm-docs.sh
         ./update-helm-docs.sh
