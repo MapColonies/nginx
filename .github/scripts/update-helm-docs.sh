@@ -14,6 +14,8 @@ cd ../../helm
 echo "Generating helm-docs output..."
 helm_docs_output=$(helm-docs --chart-search-root="." --template-files=VALUES.md.gotmpl)
 
+echo(helm_docs_output)
+
 # Read the existing README.md
 readme_file="../README.md"
 if [ ! -f "$readme_file" ]; then
