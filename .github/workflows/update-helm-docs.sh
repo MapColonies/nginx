@@ -8,16 +8,8 @@ if ! command -v helm-docs &>/dev/null; then
 fi
 
 # Navigate to the charts directory
-pwd
 cd ../../helm
 
-# # Run helm-docs for each chart
-# for chart in */; do
-#     if [ -d "$chart" ]; then
-#         echo "Generating docs for $chart"
 helm-docs --chart-search-root="." --template-files=VALUES.md.gotmpl --output-file=../README.md
-#     fi
-# done
-
 
 echo "Helm documentation updated successfully!"
