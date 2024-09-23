@@ -10,30 +10,27 @@ fi
 # Navigate to the charts directory
 cd ../../helm
 
-# Generate the helm-docs output
-echo "Generating helm-docs output..."
-helm_docs_output=$(helm-docs --chart-search-root="." --template-files=VALUES.md.gotmpl)
+helm-docs --chart-search-root="." --output-file=../values.md
 
-echo(helm_docs_output)
+echo "Helm documentation updated successfully!"
 
-# Read the existing README.md
-readme_file="../README.md"
-if [ ! -f "$readme_file" ]; then
-    echo "README.md not found!"
+# Check if the values.md file was generated
+if [ ! -f "$VALUES_MD" ]; then
+    echo "Error: $VALUES_MD file not found!"
     exit 1
 fi
 
-# Replace the content between the helm-docs markers
-echo "Updating README.md with helm-docs output..."
-awk -v new_content="$helm_docs_output" '
-    BEGIN {output = ""}
-    /<!-- helm-docs-start -->/ {output = output $0 "\n" new_content "\n"; skip = 1; next}
-    /<!-- helm-docs-end -->/ {skip = 0}
-    !skip {output = output $0 "\n"}
-    END {print output}
-' "$readme_file" > temp_readme.md
+# Check if the README.md contains the markers
+if grep -q "$START_MARKER" "$README"; then
+    # Extract the content of values.md
+    VALUES_CONTENT=$(cat "$VALUES_MD")
 
-# Replace the old README.md with the updated one
-mv temp_readme.md "$readme_file"
+    # Replace content between markers in README.md
+    sed -i.bak "/$START_MARKER/,/$END_MARKER/{/$START_MARKER/{p; r $VALUES_MD
+        };/$END_MARKER/p; d}" "$README"
 
-echo "Helm documentation updated successfully!"
+    echo "Helm documentation successfully inserted into README.md!"
+else
+    echo "Error: Markers not found in $README. Please ensure HELM_DOCS_START and HELM_DOCS_END are present."
+    exit 1
+fi
