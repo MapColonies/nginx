@@ -1,9 +1,3 @@
-### Parameters
-
-These are the main parameters you should adjust when you deploy this Helm Chart. You can find all parameters in the `values.yaml` file.
-
-  #### NGINX Parameters
-<!-- HELM_DOCS_START -->
 # nginx
 
 ![Version: 1.3.0](https://img.shields.io/badge/Version-1.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.0](https://img.shields.io/badge/AppVersion-1.0.0-informational?style=flat-square)
@@ -87,4 +81,3 @@ A Helm chart for nginx
 | siteStatusPort | int | `8081` | Port on which the site status will be available |
 | targetPort | int | `8080` | Port to which the service will forward traffic |
 
-<!-- HELM_DOCS_END -->
