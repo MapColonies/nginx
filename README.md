@@ -72,6 +72,7 @@ These are the main parameters you should adjust when you deploy this Helm Chart.
 
   #### NGINX Parameters
 <!-- helm-docs-start -->
+
 <!-- helm-docs-end -->
 
 #### Overriding NGINX configuration files
@@ -122,4 +123,5 @@ There's an option to dynamically add annotations to the pod. You might find it u
 `prometheusExporter.resources.value.limits.memory` | Pod memory limit | `128Mi`
 `prometheusExporter.resources.value.requests.cpu` | Pod CPU request | `100m`
 `prometheusExporter.resources.value.requests.memory` | Pod memory request | `128Mi`
+
 
