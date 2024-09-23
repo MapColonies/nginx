@@ -108,6 +108,7 @@ extraVolumeMounts: []
 sidecars: ''
 
 env:
+  # @section -- OpenTelemetry Support
   opentelemetry:
     # -- OpenTelemetry service name to be associated your NGINX application
     serviceName: nginx
@@ -120,6 +121,7 @@ env:
     # -- Use OpenTelemetry parnet-based sampling
     parentBased: "false" # true, false
 
+  # @section -- NGINX-Prometheus-Exporter Parameters
 prometheusExporter:
     # -- Enable or disable the Prometheus exporter sidecar
   enabled: false
