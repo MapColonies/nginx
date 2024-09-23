@@ -31,5 +31,5 @@ jobs:
         git add .
         git diff --quiet && git diff --staged --quiet || git commit -m "Update Helm documentation"
         git push
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        github_token: ${{ secrets.GH_PAT }}
