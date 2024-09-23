@@ -1,6 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+README="README.md"
+VALUES_MD="values.md"
+START_MARKER="<!-- HELM_DOCS_START -->"
+END_MARKER="<!-- HELM_DOCS_END -->"
+
 # Check if helm-docs is installed
 if ! command -v helm-docs &>/dev/null; then
     echo "helm-docs could not be found. Installing it..."
