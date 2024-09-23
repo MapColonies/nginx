@@ -1,82 +1,21 @@
-## Values
+{{- /*
+Generated helm-docs template file for chart values. This file will be rendered as README.md.
+*/ -}}
 
-This section contains the configurable parameters for the Helm chart and their corresponding default values.
+# {{ .Chart.Name }} - Helm Chart
 
-You can use this table to understand the various options available and their descriptions, and then override them in your own `values.yaml` file as needed.
+## Chart Values
 
-<details>
-<summary>Show values</summary>
-
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-{{- range .Values }}
-{{- if hasPrefix "global." .Key }}
-| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
-{{- end }}
-{{- end }}
-{{- range .Values }}
-{{- if not (hasPrefix "global." .Key) }}
-{{- if not (hasPrefix "image." .Key) }}
-{{- if not (hasPrefix "prometheusExporter." .Key) }}
-{{- if not (hasPrefix "resources." .Key) }}
-{{- if not (hasPrefix "ingress." .Key) }}
-| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
-{{- end }}
-
-</details>
-
-<details>
-<summary>Image Configuration</summary>
+This table lists the configurable parameters of the chart and their default values.
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 {{- range .Values }}
-{{- if hasPrefix "image." .Key }}
-| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
-{{- end }}
+| `{{ .Key }}` | `{{ .Type | default "string" }}` | `{{ .Default | quote }}` | {{ .Description | default "No description." }} |
 {{- end }}
 
-</details>
+---
 
-<details>
-<summary>Prometheus Exporter Configuration</summary>
+### Notes
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-{{- range .Values }}
-{{- if hasPrefix "prometheusExporter." .Key }}
-| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
-{{- end }}
-{{- end }}
-
-</details>
-
-<details>
-<summary>Resource Configuration</summary>
-
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-{{- range .Values }}
-{{- if hasPrefix "resources." .Key }}
-| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
-{{- end }}
-{{- end }}
-
-</details>
-
-<details>
-<summary>Ingress Configuration</summary>
-
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-{{- range .Values }}
-{{- if hasPrefix "ingress." .Key }}
-| {{ .Key }} | {{ .Type }} | {{ if .Default }}{{ .Default }}{{ else }}{{ .AutoDefault }}{{ end }} | {{ if .Description }}{{ .Description }}{{ else }}{{ .AutoDescription }}{{ end }} |
-{{- end }}
-{{- end }}
-
-</details>
+- For detailed configuration options, refer to the comments within the `values.yaml` file or the Helm documentation.

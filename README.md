@@ -72,7 +72,6 @@ These are the main parameters you should adjust when you deploy this Helm Chart.
 
   #### NGINX Parameters
 <!-- helm-docs-start -->
-
 <!-- helm-docs-end -->
 
 #### Overriding NGINX configuration files
@@ -103,8 +102,8 @@ sidecars:
    image: "envoyproxy/envoy:v1.20.7"
    volumeMounts: []
    args: []
-   ports: []
    resources: {}
+   ports: []
 ...
 ```
 
