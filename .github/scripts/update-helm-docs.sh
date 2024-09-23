@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-README="README.md"
+README="../README.md"
 VALUES_MD="../values.md"
 START_MARKER="<!-- HELM_DOCS_START -->"
 END_MARKER="<!-- HELM_DOCS_END -->"
