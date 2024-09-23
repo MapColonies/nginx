@@ -125,3 +125,4 @@ There's an option to dynamically add annotations to the pod. You might find it u
 `prometheusExporter.resources.value.requests.memory` | Pod memory request | `128Mi`
 
 
+
