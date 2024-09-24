@@ -30,9 +30,7 @@ TABLE_CONTENT=$(sed -n '/^|/p' "$VALUES_MD")
 
 # Check if the README.md contains the markers
 if grep -q "$START_MARKER" "$README"; then
-    # Extract the content of values.md
-
-    # Replace content between markers in README.md
+    # Replace content between markers in README.md with the table content
     sed -i.bak "/$START_MARKER/,/$END_MARKER/{/$START_MARKER/{p; a $TABLE_CONTENT
         };/$END_MARKER/p; d}" "$README"
 
