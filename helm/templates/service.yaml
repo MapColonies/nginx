@@ -14,6 +14,7 @@ metadata:
     component: nginx-service
     environment: {{ include "nginx.environment" . }}
     release: {{ .Release.Name }}
+    {{- include "nginx.labels" . | nindent 4 }}
 spec:
   # In case cloudProavider=azure
   {{- if eq $cloudProviderFlavor "azure" }}
