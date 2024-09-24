@@ -25,13 +25,15 @@ if [ ! -f "$VALUES_MD" ]; then
     exit 1
 fi
 
+# Extract only the table content (lines starting with '|')
+TABLE_CONTENT=$(sed -n '/^|/p' "$VALUES_MD")
+
 # Check if the README.md contains the markers
 if grep -q "$START_MARKER" "$README"; then
     # Extract the content of values.md
-    VALUES_CONTENT=$(cat "$VALUES_MD")
 
     # Replace content between markers in README.md
-    sed -i.bak "/$START_MARKER/,/$END_MARKER/{/$START_MARKER/{p; r $VALUES_MD
+    sed -i.bak "/$START_MARKER/,/$END_MARKER/{/$START_MARKER/{p; a $TABLE_CONTENT
         };/$END_MARKER/p; d}" "$README"
 
     echo "Helm documentation successfully inserted into README.md!"
