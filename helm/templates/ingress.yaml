@@ -7,6 +7,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  labels:
+    {{- include "nginx.labels" . | nindent 4 }}
   {{- if eq (len $ingress.ingressMapping) 1 }}
   name: {{ printf "%s-ingress" $fullName }}
   {{- else }}
