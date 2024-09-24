@@ -117,7 +117,7 @@ route:
     caCertificate: ''
 
 ingress:
-  enabled: true
+  enabled: false
   ingressClassName: nginx
   additionalAnnotations: 
     # for NGINX ingress controller
