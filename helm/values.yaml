@@ -29,8 +29,8 @@ caKey: 'ca.crt'
 image:
   repository: nginx
   tag: 'latest' 
+
 port: 8080
-internalServicePort: 80
 targetPort: 8080
 siteStatusPort: 8081
 nodePort: 30001
@@ -118,9 +118,16 @@ route:
 
 ingress:
   enabled: false
-  path: /
-  host: ''
+  ingressClassName: nginx
+  additionalAnnotations: 
+    # for NGINX ingress controller
+    # kubernetes.io/ingress.class: nginx
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+  ingressMapping:
+    - path: /
+      host: 
+      pathType: Prefix
   domain: ''
   tls: 
-    enabled: true
+    enabled: false
     secretName: ''
