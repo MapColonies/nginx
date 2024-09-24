@@ -50,13 +50,13 @@ There is also an Helm Chart for deploying this NGINX in an Openshift environment
 Besides NGINX, this Helm Chart also deploys (on deamend) a Prometheus exporter for NGINX using [nginx-prometheus-exporter](https://github.com/nginxinc/nginx-prometheus-exporter/). Follow the parameters below in order to configure NGINX and its Prometheus exporter as you wish.
 
 ### Parameters
-For a detailed list of configurable values, please refer to the [values.md](./values.md) file.
+For a detailed list of configurable values, please refer to the [values.md](./values.md) file.  
+These are the main parameters you should adjust when you deploy this Helm Chart. You can find all parameters in the `values.yaml` file.  
 
-These are the main parameters you should adjust when you deploy this Helm Chart. You can find all parameters in the `values.yaml` file.
+There's an option to dynamically add annotations to the pod. You might find it useful if you operate on different environments and need to customize your annotations. It can be done by editing the `additionalPodAnnotations` parameter.  
 
-There's an option to dynamically add annotations to the pod. You might find it useful if you operate on different environments and need to custom your annotations. It can be done by editing the `additionalPodAnnotations` parameter.
+There's support for instrumenting NGINX with OpenTelemetry (currently only for tracing). Simply provide the `OTEL_*` environment variables.
 
-There's support for instrumenting NGINX with OpenTelemetry (currently only for tracing), simply provide the OTEL_* environment variables
 
 #### Overriding NGINX configuration files
 If you wish to override the default configuration files, you can do it by providing an external ConfigMap and supplying Volumes & VolumeMounts that'll be added to the Deployment.
