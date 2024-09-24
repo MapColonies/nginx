@@ -2,13 +2,14 @@
 {{- $context := .Values -}}
 {{- $fullName := include "nginx.fullname" . -}}
 {{- $ingress := .Values.ingress -}}
+{{- $labels := include "nginx.labels" . }}
 {{- $domain := .Values.ingress.domain | default .Values.global.ingress.domain  -}}
 {{- range $index, $ingressMapping := $ingress.ingressMapping }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   labels:
-    {{- include "nginx.labels" . | nindent 4 }}
+    {{- $labels | nindent 4 }}
   {{- if eq (len $ingress.ingressMapping) 1 }}
   name: {{ printf "%s-ingress" $fullName }}
   {{- else }}
