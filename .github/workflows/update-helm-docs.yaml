@@ -31,7 +31,7 @@ jobs:
         git config --global user.name "mapcolonies[bot]"
         git config --global user.email "devops[bot]@mapcolonies.com"
         git add .
-        git diff --quiet && git diff --staged --quiet || git commit -m "Update Helm documentation"
+        git diff --quiet && git diff --staged --quiet || git commit -m "docs: Update Helm documentation"
         git push
       env:
         github_token: ${{ secrets.GH_PAT }}
