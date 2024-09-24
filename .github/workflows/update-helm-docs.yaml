@@ -1,0 +1,37 @@
+name: Update Helm Docs
+
+on:
+  push:
+    branches:
+      - 'master'
+    paths:
+      - "helm/values.yaml"
+
+jobs:
+  update-helm-docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.23
+
+    - name: Run helm-docs
+      run: |
+        cd .github/scripts
+        chmod +x ./update-helm-docs.sh
+        ./update-helm-docs.sh
+
+    - name: Commit changes
+      run: |
+        git config --global user.name "mapcolonies[bot]"
+        git config --global user.email "devops[bot]@mapcolonies.com"
+        git add .
+        git diff --quiet && git diff --staged --quiet || git commit -m "Update Helm documentation"
+        git push
+      env:
+        github_token: ${{ secrets.GH_PAT }}
