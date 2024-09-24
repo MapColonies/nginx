@@ -37,14 +37,16 @@ A Helm chart for nginx
 | image.repository | string | `"nginx"` | Docker image name |
 | image.tag | string | `"latest"` | Docker image tag |
 | imagePullPolicy | string | `"Always"` | Image pull policy for all containers in the deployment |
+| ingress.additionalAnnotations | string | `nil` | Additional annotations for ingress |
 | ingress.domain | string | `""` | Domain of ingress |
 | ingress.enabled | bool | `false` | Expose NGINX as an Ingress |
-| ingress.host | string | `""` | Host of ingress |
-| ingress.path | string | `"/"` | Path of ingress |
-| ingress.tls.enabled | bool | `true` | Use ingress over HTTPS |
+| ingress.ingressClassName | string | `"nginx"` | Class name of ingress |
+| ingress.ingressMapping[0] | object | `{"host":null,"path":"/","pathType":"Prefix"}` | Path of ingress |
+| ingress.ingressMapping[0].host | string | `nil` | Host of ingress |
+| ingress.ingressMapping[0].pathType | string | `"Prefix"` | Path Type of ingreaa |
+| ingress.tls.enabled | bool | `false` | Use ingress over HTTPS |
 | ingress.tls.secretName | string | `""` | Secret name of ingress that points to the relevant custom certificates |
 | initialDelaySeconds | int | `60` | Initial delay in seconds before the readiness probe starts |
-| internalServicePort | int | `80` | Internal ClusterIP service port |
 | nameOverride | string | `""` | String to partially override fullname template (will maintain the release name) |
 | nodePort | int | `30001` | Port to expose on each node for NodePort service type |
 | port | int | `8080` | Port on which the application will listen |

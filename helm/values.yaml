@@ -52,8 +52,6 @@ image:
   tag: 'latest' 
 # -- Port on which the application will listen
 port: 8080
-# -- Internal ClusterIP service port
-internalServicePort: 80
 # -- Port to which the service will forward traffic
 targetPort: 8080
 # -- Port on which the site status will be available
@@ -189,14 +187,25 @@ route:
 ingress:
   # -- Expose NGINX as an Ingress
   enabled: false
-  # -- Path of ingress
-  path: /
-  # -- Host of ingress
-  host: ''
+  # -- Class name of ingress
+  ingressClassName: nginx
+  # -- Additional annotations for ingress
+  additionalAnnotations: 
+    # for NGINX ingress controller
+    # kubernetes.io/ingress.class: nginx
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+    #
+  ingressMapping:
+      # -- Path of ingress
+    - path: /
+      # -- Host of ingress
+      host:
+      # -- Path Type of ingreaa
+      pathType: Prefix
   # -- Domain of ingress
   domain: ''
-  tls: 
+  tls:
     # -- Use ingress over HTTPS
-    enabled: true
+    enabled: false
     # -- Secret name of ingress that points to the relevant custom certificates
     secretName: ''
