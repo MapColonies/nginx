@@ -15,8 +15,8 @@ fi
 # Navigate to the charts directory
 cd ../../helm
 
+# Generate helm-docs
 helm-docs --chart-search-root="." --output-file=../values.md
-
 echo "Helm documentation updated successfully!"
 
 # Check if the values.md file was generated
@@ -25,16 +25,22 @@ if [ ! -f "$VALUES_MD" ]; then
     exit 1
 fi
 
-# Extract only the table content (lines starting with '|')
-TABLE_CONTENT=$(sed -n '/^|/p' "$VALUES_MD")
-
 # Check if the README.md contains the markers
 if grep -q "$START_MARKER" "$README"; then
-    # Replace content between markers in README.md with the table content
-    sed -i.bak "/$START_MARKER/,/$END_MARKER/{/$START_MARKER/{p; a $TABLE_CONTENT
-        };/$END_MARKER/p; d}" "$README"
-
-    echo "Helm documentation successfully inserted into README.md!"
+    # Extract only the table content from values.md
+    TABLE_CONTENT=$(sed -n '/^|/,/^$/p' "$VALUES_MD")
+    
+    # Replace content between markers in README.md
+    sed -i.bak "/$START_MARKER/,/$END_MARKER/{
+        /$START_MARKER/{
+            p
+            a $TABLE_CONTENT
+        }
+        /$END_MARKER/p
+        d
+    }" "$README"
+    
+    echo "Helm documentation table successfully inserted into README.md!"
 else
     echo "Error: Markers not found in $README. Please ensure HELM_DOCS_START and HELM_DOCS_END are present."
     exit 1
