@@ -28,17 +28,14 @@ fi
 # Check if the README.md contains the markers
 if grep -q "$START_MARKER" "$README"; then
     # Extract only the table content from values.md
-    TABLE_CONTENT=$(sed -n '/^|/,/^$/p' "$VALUES_MD")
+    TABLE_CONTENT=$(awk '/^\|/,/^$/' "$VALUES_MD" | sed 's/$/\\/')
     
     # Replace content between markers in README.md
-    sed -i.bak "/$START_MARKER/,/$END_MARKER/{
-        /$START_MARKER/{
-            p
-            a $TABLE_CONTENT
-        }
-        /$END_MARKER/p
-        d
-    }" "$README"
+    awk -v start="$START_MARKER" -v end="$END_MARKER" -v table="$TABLE_CONTENT" '
+    $0 ~ start {print; print table; flag=1; next}
+    $0 ~ end {flag=0}
+    !flag
+    ' "$README" > "$README.tmp" && mv "$README.tmp" "$README"
     
     echo "Helm documentation table successfully inserted into README.md!"
 else
