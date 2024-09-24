@@ -1,28 +1,44 @@
-{{- $releaseName := .Release.Name -}}
-{{- $chartName := include "nginx.name" . -}}
-{{- $ingressHost := include "nginx.ingress.host" . -}}
 {{- if and (.Values.enabled) (.Values.ingress.enabled) -}}
+{{- $context := .Values -}}
+{{- $fullName := include "nginx.fullname" . -}}
+{{- $ingress := .Values.ingress -}}
+{{- $domain := .Values.ingress.domain | default .Values.global.ingress.domain  -}}
+{{- range $index, $ingressMapping := $ingress.ingressMapping }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ printf "%s-ingress" (include "nginx.fullname" .) }}
-  {{ include "nginx.ingress.annotations" . }}
+  {{- if eq (len $ingress.ingressMapping) 1 }}
+  name: {{ printf "%s-ingress" $fullName }}
+  {{- else }}
+  name: {{ printf "%s-ingress-%d" $fullName (add1 $index) }}
+  {{- end }}
+  annotations:
+    {{- toYaml $ingress.additionalAnnotations | nindent 4 }}
 spec:
-  {{- if .Values.ingress.tls.enabled }}
+  ingressClassName: {{ $ingress.ingressClassName | quote }}
+  {{- if $ingress.tls.enabled }}
   tls:
   - hosts:
-    - {{ .Values.ingress.host | quote }}
-    secretName: {{ .Values.ingress.tls.secretName }}
+    - {{ $ingressMapping.host | quote }}
+    secretName: {{ $ingress.tls.secretName }}
   {{- end }}
   rules:
   - http:
       paths:
-      - path: {{ .Values.ingress.path }}
-        pathType: Prefix
+      - path: {{ $ingressMapping.path }}
+        pathType: {{ $ingressMapping.pathType }}
         backend:
           service:
-            name: {{ printf "%s-service" (include "nginx.fullname" .) }}
+            name: {{ printf "%s-service" $fullName }}
             port:
-              number: {{ .Values.port }}
-    host: {{ $ingressHost }}
+              number: {{ $context.port }}
+  {{- if $ingressMapping.host }}
+    {{- if $domain }}
+    host: {{ printf "%s.%s" $ingressMapping.host $domain }}
+    {{- else }}
+    host: {{ printf "%s" $ingressMapping.host }}
+    {{- end }}
+  {{- end }}
+{{ printf "---" }}
+{{- end }}
 {{- end -}}

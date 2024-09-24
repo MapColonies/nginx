@@ -105,14 +105,6 @@ Returns the cloud provider image pull secret name from global if exists or from 
 {{- end -}}
 
 {{/*
-Returns all annoations for the ingress component
-*/}}
-{{- define "nginx.ingress.annotations" -}}
-annotations:
-    kubernetes.io/ingress.class: openshift-default
-{{- end -}}
-
-{{/*
 Returns the port for NGINX Prometheus Exporter
 */}}
 {{- define "prometheusExporter.targetPort" -}}
@@ -129,18 +121,4 @@ Returns the port for NGINX Prometheus Exporter
         {{- $subPathsList = append $subPathsList .subPath -}}
     {{- end -}}
     {{ toJson $subPathsList }}
-{{- end -}}
-
-{{/*
-Returns the full ingress host.
-*/}}
-{{- define "nginx.ingress.host" -}}
-{{- $fullName := include "nginx.fullname" . -}}
-{{- if .Values.ingress.host }}
-    {{- .Values.ingress.host -}}
-{{- else if .Values.ingress.domain -}}
-{{- printf "%s.%s" $fullName .Values.ingress.domain }}
-{{- else -}}
-{{- printf "%s.%s" $fullName .Values.global.ingress.domain }}
-{{- end -}}
 {{- end -}}
