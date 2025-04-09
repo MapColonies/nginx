@@ -119,6 +119,11 @@ env:
     # -- Use OpenTelemetry parnet-based sampling
     parentBased: "false" # true, false
 
+  # @section -- Nginx Configuration
+  nginx:
+    # -- Maximum age of the cache in seconds (for the header: Access-Control-Max-Age)
+    maxAge: 
+
   # @section -- NGINX-Prometheus-Exporter Parameters
 prometheusExporter:
     # -- Enable or disable the Prometheus exporter sidecar
