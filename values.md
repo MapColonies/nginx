@@ -20,6 +20,7 @@ A Helm chart for nginx
 | cloudProvider.flavor | string | `"openshift"` | Specify the flavor of the deployment  |
 | cloudProvider.imagePullSecretName | string | `"imagepullsecret"` | Name of the Kubernetes secret containing the image pull credentials |
 | enabled | bool | `true` | Enable or disable the deployment of this chart |
+| env.nginx.maxAge | string | `nil` | Maximum age of the cache in seconds (for the header: Access-Control-Max-Age) |
 | env.opentelemetry.exporterEndpoint | string | `"localhost:4317"` | OpenTelemetry Collector endpoint address |
 | env.opentelemetry.parentBased | string | `"false"` | Use OpenTelemetry parnet-based sampling |
 | env.opentelemetry.ratio | float | `0.1` | OpenTelemetry sampling ratio |
