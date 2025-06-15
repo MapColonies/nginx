@@ -4,6 +4,17 @@ local.file_match "container_logs" {
 
 loki.source.file "container_logs" {
   targets    = local.file_match.container_logs.targets
+  forward_to = [loki.process.add_labels.receiver]
+}
+
+loki.process "add_labels" {
+  stage.static_labels {
+    values = {
+      environment    = "dev",
+      team           = "infra",
+      application    = "nginx",
+    }
+  }
   forward_to = [loki.write.central.receiver]
 }
 
