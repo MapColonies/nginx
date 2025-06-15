@@ -1,0 +1,14 @@
+local.file_match "container_logs" {
+  path_targets = [{ "__path__" = "/mnt/logs/**/*.log" }]
+}
+
+loki.source.file "container_logs" {
+  targets    = local.file_match.container_logs.targets
+  forward_to = [loki.write.central.receiver]
+}
+
+loki.write "central" {
+  endpoint {
+    url = "http://infra-monitoring-alloy-central.infra-dev.svc.cluster.local:3100/loki/api/v1/push"
+  }
+}

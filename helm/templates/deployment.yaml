@@ -54,6 +54,10 @@ spec:
           image: {{ $cloudProviderDockerRegistryUrl }}{{ .repository }}:{{ .tag }}
           {{- end }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
+          # command: ["nginx", "-g", "daemon off;"]
+          # args:
+          #   - |
+          #     nginx -g 'daemon off;'
           env:
           - name: OTEL_SERVICE_NAME
             value: {{ .Values.env.opentelemetry.serviceName | quote}}

@@ -1,0 +1,8 @@
+{{- if .Values.log_shipper.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-alloy-config" (include "nginx.fullname" .) }}
+data:
+  config.alloy: {{ tpl (.Files.Get "config/config.alloy") . | quote }}
+{{- end }}
