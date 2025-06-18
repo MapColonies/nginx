@@ -122,3 +122,16 @@ Returns the port for NGINX Prometheus Exporter
     {{- end -}}
     {{ toJson $subPathsList }}
 {{- end -}}
+
+{{/*
+Generate OpenTelemetry trace configuration
+*/}}
+{{- define "nginx.otelTrace" -}}
+{{- if eq .Values.opentelemetry.samplerMethod "AlwaysOn" -}}
+otel_trace on;
+{{- else if eq .Values.opentelemetry.samplerMethod "TraceIdRatioBased" -}}
+otel_trace $ratio_sampler;
+{{- else -}}
+otel_trace off;
+{{- end -}}
+{{- end -}}
