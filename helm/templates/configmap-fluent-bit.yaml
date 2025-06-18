@@ -1,0 +1,10 @@
+{{- if .Values.log_shipper.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-fluent-bit-config" (include "nginx.fullname" .) }}
+data:
+  fluent-bit.conf: {{ tpl (.Files.Get "config/fluent-bit.conf") . | quote }}
+  parsers.conf: {{ tpl (.Files.Get "config/fluent-bit-parsers.conf") . | quote }}
+  custom_parsers.conf: {{ tpl (.Files.Get "config/fluent-bit-custom-parsers.conf") . | quote }}
+{{- end }}

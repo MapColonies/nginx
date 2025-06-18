@@ -11,6 +11,9 @@ global:
     # -- Domain name for the ingress.
     domain: ''
 
+
+serviceAccountName: "fluent-bit"
+
 # -- Enable or disable the deployment of this chart
 enabled: true
 # -- Specify the environment for this deployment 
@@ -89,9 +92,9 @@ additionalPodAnnotations: {}
 extraVolumes:
   - name: nginx-logs
     emptyDir: {}
-  - name: alloy-config
+  - name: fluent-bit-config
     configMap:
-      name: infra-nginx-alloy-alloy-config
+      name: infra-nginx-alloy-fluent-bit-config
 
 
 # Add extra volumeMounts to the Pod, for example
@@ -121,18 +124,16 @@ extraVolumeMounts:
 # sidecars: ''
 
 sidecars: |-
-  - name: alloy
+  - name: fluent-bit
     image: "{{ .Values.log_shipper.config.imageName }}:{{ .Values.log_shipper.config.imageTag }}"
     volumeMounts:
       - name: nginx-logs
         mountPath: /mnt/logs/nginx
-      - name: alloy-config
-        mountPath: /etc/alloy
+      - name: fluent-bit-config
+        mountPath: /fluent-bit/etc/conf
     args:
-      - run
-      - /etc/alloy/config.alloy
-      - '--storage.path=/tmp/alloy'
-      - '--stability.level=generally-available'
+      - --workdir=/fluent-bit/etc
+      - --config=/fluent-bit/etc/conf/fluent-bit.conf
     ports: []
     resources:
     {{- toYaml .Values.log_shipper.config.resources | nindent 4 }}
@@ -247,28 +248,29 @@ ingress:
     # -- Secret name of ingress that points to the relevant custom certificates
     secretName: ''
 
+# log_shipper:
+#   enabled: false
+#   config:
+#     configFile: config/fluent-bit.conf
+#     imageName: docker.io/grafana/alloy
+#     imageTag: v1.7.2
+#     resources:
+#       limits:
+#         cpu: 1000m
+#         memory: 256Mi
+#       requests:
+#         cpu: 250m
+#         memory: 256Mi
+
 log_shipper:
-  # -- Enable or disable the log shipper
   enabled: true
-  # -- Log shipper type (e.g., Fluentd, Fluent Bit, Filebeat)
-  type: alloy
-  # -- Log shipper configuration
   config:
-    # -- Log shipper configuration file
-    configFile: config/fluent-bit.conf
-    # -- Log shipper image name
-    imageName: docker.io/grafana/alloy
-    # -- Log shipper image tag
-    imageTag: v1.7.2
+    imageName: cr.fluentbit.io/fluent/fluent-bit
+    imageTag: 4.0.3
     resources:
       limits:
-        # -- CPU limit for the log shipper container
         cpu: 1000m
-        # -- Memory limit for the log shipper container
         memory: 256Mi
       requests:
-        # -- CPU request for the log shipper container
         cpu: 250m
-        # -- Memory request for the log shipper container
         memory: 256Mi
-  # -- Log shipper configuration file path

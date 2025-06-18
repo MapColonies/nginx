@@ -41,6 +41,9 @@ spec:
       imagePullSecrets:
         - name: {{ $cloudProviderImagePullSecretName | quote }}
     {{- end }}
+      {{- if .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccountName | quote }}
+      {{- end }}
       volumes:
         - name: nginx-base-config
           configMap:	
