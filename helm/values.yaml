@@ -107,9 +107,9 @@ sidecars: ""
 
 backend:
   # -- Backend service name for proxy_pass
-  serviceName: "backend-service"
+  host: "backend-service"
   # -- Backend service port
-  servicePort: 8080
+  port: 8080
 
   # @section -- OpenTelemetry Support
 opentelemetry:
