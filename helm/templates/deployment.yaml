@@ -28,6 +28,9 @@ spec:
         app: {{ $fullName | quote }}
         release: {{ .Release.Name }}
         run: {{ .Release.Name }}-nginx
+        {{- if .Values.podLabels}}
+        {{ toYaml .Values.podLabels | nindent 8 }}
+        {{- end}}
       annotations:
         {{- if .Values.prometheusExporter.enabled }}
         prometheus.io/scrape: 'true'

@@ -14,6 +14,10 @@ global:
 
 serviceAccountName: "fluent-bit"
 
+
+podLabels:
+  mapcolonies.io/alloy-api-logs: "true"
+
 # -- Enable or disable the deployment of this chart
 enabled: true
 # -- Specify the environment for this deployment 
@@ -123,20 +127,20 @@ extraVolumeMounts:
 # -- String consists of a list of sidecars containers that are added to the Deployment
 # sidecars: ''
 
-sidecars: |-
-  - name: fluent-bit
-    image: "{{ .Values.log_shipper.config.imageName }}:{{ .Values.log_shipper.config.imageTag }}"
-    volumeMounts:
-      - name: nginx-logs
-        mountPath: /mnt/logs/nginx
-      - name: fluent-bit-config
-        mountPath: /fluent-bit/etc/conf
-    args:
-      - --workdir=/fluent-bit/etc
-      - --config=/fluent-bit/etc/conf/fluent-bit.conf
-    ports: []
-    resources:
-    {{- toYaml .Values.log_shipper.config.resources | nindent 4 }}
+# sidecars: |-
+#   - name: fluent-bit
+#     image: "{{ .Values.log_shipper.config.imageName }}:{{ .Values.log_shipper.config.imageTag }}"
+#     volumeMounts:
+#       - name: nginx-logs
+#         mountPath: /mnt/logs/nginx
+#       - name: fluent-bit-config
+#         mountPath: /fluent-bit/etc/conf
+#     args:
+#       - --workdir=/fluent-bit/etc
+#       - --config=/fluent-bit/etc/conf/fluent-bit.conf
+#     ports: []
+#     resources:
+#     {{- toYaml .Values.log_shipper.config.resources | nindent 4 }}
 
 env:
   # @section -- OpenTelemetry Support
