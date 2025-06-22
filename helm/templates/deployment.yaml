@@ -54,17 +54,6 @@ spec:
           image: {{ $cloudProviderDockerRegistryUrl }}{{ .repository }}:{{ .tag }}
           {{- end }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          env:
-          - name: OTEL_SERVICE_NAME
-            value: {{ .Values.env.opentelemetry.serviceName | quote}}
-          - name: OTEL_EXPORTER_OTLP_ENDPOINT
-            value: {{ .Values.env.opentelemetry.exporterEndpoint | quote}}
-          - name: OTEL_TRACES_SAMPELR
-            value: {{ .Values.env.opentelemetry.samplerMethod | quote }}
-          - name: OTEL_TRACES_SAMPLER_RATIO
-            value: {{ .Values.env.opentelemetry.ratio | quote }}
-          - name: OTEL_TRACES_SAMPLER_PARENT_BASED
-            value: {{ .Values.env.opentelemetry.parentBased | quote }}
           volumeMounts:
             {{ if not (has "default.conf" $listOfSubPaths ) }}
             - name: nginx-base-config

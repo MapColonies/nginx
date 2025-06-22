@@ -1,7 +1,7 @@
 global:
-  # -- Global cloud provider configuration. 
+  # -- Global cloud provider configuration.
   cloudProvider: {}
-  # -- Configuration for distributed tracing. 
+  # -- Configuration for distributed tracing.
   tracing: {}
   # -- Configuration for metrics collection.
   metrics: {}
@@ -9,11 +9,11 @@ global:
   environment: ""
   ingress:
     # -- Domain name for the ingress.
-    domain: ''
+    domain: ""
 
 # -- Enable or disable the deployment of this chart
 enabled: true
-# -- Specify the environment for this deployment 
+# -- Specify the environment for this deployment
 environment: development
 # -- Number of replicas to deploy
 replicaCount: 1
@@ -35,21 +35,21 @@ cloudProvider:
   dockerRegistryUrl: my-registry-url
   # -- Name of the Kubernetes secret containing the image pull credentials
   imagePullSecretName: imagepullsecret
-  # -- Specify the flavor of the deployment 
+  # -- Specify the flavor of the deployment
   flavor: openshift
 
 # -- Name of the Kubernetes secret containing the CA certificate
-caSecretName: ''
+caSecretName: ""
 # -- Path where the CA certificate will be mounted in the container
-caPath: '/usr/local/share/ca-certificates'
+caPath: "/usr/local/share/ca-certificates"
 # -- Key in the CA secret that contains the certificate data
-caKey: 'ca.crt'
+caKey: "ca.crt"
 
 image:
   # -- Docker image name
   repository: nginx
   # -- Docker image tag
-  tag: 'latest' 
+  tag: "latest"
 # -- Port on which the application will listen
 port: 8080
 # -- Port to which the service will forward traffic
@@ -103,30 +103,35 @@ extraVolumeMounts: []
 #     {{- toYaml .Values.envoy.resources.value | nindent 12 }}
 #
 # -- String consists of a list of sidecars containers that are added to the Deployment
-sidecars: ''
+sidecars: ""
 
-env:
+backend:
+  # -- Backend service name for proxy_pass
+  host: "backend-service"
+  # -- Backend service port
+  port: 8080
+
   # @section -- OpenTelemetry Support
-  opentelemetry:
-    # -- OpenTelemetry service name to be associated your NGINX application
-    serviceName: nginx
-    # -- OpenTelemetry Collector endpoint address
-    exporterEndpoint: localhost:4317
-    # -- OpenTelemetry sampling method
-    samplerMethod: "AlwaysOff" # AlwaysOn, AlwaysOff, TraceIdRatioBased
-    # -- OpenTelemetry sampling ratio
-    ratio: 0.1 # between 0 and 1
-    # -- Use OpenTelemetry parnet-based sampling
-    parentBased: "false" # true, false
+opentelemetry:
+  # -- OpenTelemetry service name to be associated your NGINX application
+  serviceName: nginx
+  # -- OpenTelemetry Collector endpoint address
+  # exporterHost: "localhost"
+  exporterPort: 4317 # gRPC port for OpenTelemetry Collector
+  # -- OpenTelemetry sampling method
+  samplerMethod: "AlwaysOff" # AlwaysOn, AlwaysOff, TraceIdRatioBased
+  # -- OpenTelemetry sampling ratio
+  ratio: 10 # between 0 and 1
+  # -- Use OpenTelemetry parnet-based sampling
 
-  # @section -- Nginx Configuration
-  nginx:
-    # -- Maximum age of the cache in seconds (for the header: Access-Control-Max-Age)
-    maxAge: 
+# @section -- Nginx Configuration
+nginx:
+  # -- Maximum age of the cache in seconds (for the header: Access-Control-Max-Age)
+  maxAge:
 
   # @section -- NGINX-Prometheus-Exporter Parameters
 prometheusExporter:
-    # -- Enable or disable the Prometheus exporter sidecar
+  # -- Enable or disable the Prometheus exporter sidecar
   enabled: false
   image:
     # -- Docker image name for the Prometheus exporter
@@ -148,31 +153,31 @@ prometheusExporter:
         # -- CPU request for the main container
         cpu: 100m
         # -- Memory request for the main container
-        memory: 128Mi  
+        memory: 128Mi
 
 authorization:
   # -- Use authroization mechanism
   enabled: true
   # -- Your authorization domain
-  domain: 'example'
+  domain: "example"
   # -- Authorization endpoint
-  url: 'http://localhost:8181/v1/data/http/authz/decision'
+  url: "http://localhost:8181/v1/data/http/authz/decision"
 
 route:
   # -- Expose NGINX as an Openshift route
   enabled: true
-  routesMapping: 
+  routesMapping:
     # -- Path of route
     - path: /
-    # -- Host of route
-      host: 
+      # -- Host of route
+      host:
   timeout:
     # -- Use custom timeout duration of the route
     enabled: false # defaults to 30s by openshift
     # -- Set the timeout duration of the route. Defaults to 30s by Openshift
     duration: 60s # supported units (us, ms, s, m, h, d)
   # -- Rewrite route target
-  rewriteTarget: ''
+  rewriteTarget: ""
   tls:
     # -- Use route over HTTPS
     enabled: true
@@ -183,11 +188,11 @@ route:
     # -- Use custom certificates for the route
     useCerts: false
     # -- Set the certificate of the route
-    certificate: ''
+    certificate: ""
     # -- Set the key of the route
-    key: ''
+    key: ""
     # -- Set the CA certificate of the route
-    caCertificate: ''
+    caCertificate: ""
 
 ingress:
   # -- Expose NGINX as an Ingress
@@ -195,22 +200,22 @@ ingress:
   # -- Class name of ingress
   ingressClassName: nginx
   # -- Additional annotations for ingress
-  additionalAnnotations: 
+  additionalAnnotations:
     # for NGINX ingress controller
     # kubernetes.io/ingress.class: nginx
     # nginx.ingress.kubernetes.io/rewrite-target: /
     #
   ingressMapping:
-      # -- Path of ingress
+    # -- Path of ingress
     - path: /
       # -- Host of ingress
       host:
       # -- Path Type of ingreaa
       pathType: Prefix
   # -- Domain of ingress
-  domain: ''
+  domain: ""
   tls:
     # -- Use ingress over HTTPS
     enabled: false
     # -- Secret name of ingress that points to the relevant custom certificates
-    secretName: ''
+    secretName: ""
