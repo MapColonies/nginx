@@ -17,6 +17,9 @@ serviceAccountName: "fluent-bit"
 
 podLabels:
   mapcolonies.io/alloy-api-logs: "true"
+  mapcolonies.io/owner: "infra"
+  app.kubernetes.io/name: "nginx-alloy"
+
 
 # -- Enable or disable the deployment of this chart
 enabled: true
