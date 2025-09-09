@@ -9,9 +9,6 @@ jobs:
   build_and_push:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-
       - name: artifactory_login
         uses: MapColonies/shared-workflows/actions/artifactory-login@artifactory-login-v1
         with:
