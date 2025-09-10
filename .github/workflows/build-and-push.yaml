@@ -1,0 +1,36 @@
+name: Build and push helm chart
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: artifactory_login
+        uses: MapColonies/shared-workflows/actions/artifactory-login@artifactory-login-v1
+        with:
+          registry: ${{ secrets.ACR_URL }}
+          username: ${{ secrets.ACR_PUSH_USER }}
+          password: ${{ secrets.ACR_PUSH_TOKEN }}
+      
+      - name: build_docker_image
+        id: docker_build
+        uses: MapColonies/shared-workflows/actions/build-docker@build-docker-v1
+        with:
+          registry: ${{ secrets.ACR_URL }}
+          domain: common
+
+      - name: push_docker_image
+        uses: MapColonies/shared-workflows/actions/push-docker@push-docker-v1
+        with:
+          image_name: ${{ steps.docker_build.outputs.docker_image_full_name }}
+          image_tag: ${{ steps.docker_build.outputs.docker_image_tag }}
+
+      - name: build_and_push_helm_chart
+        uses: MapColonies/shared-workflows/actions/build-and-push-helm@build-and-push-helm-v1
+        with:
+          registry: ${{ secrets.ACR_URL }}
+          domain: common
