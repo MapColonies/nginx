@@ -9,7 +9,10 @@ async function opaAuth(r) {
     const body = {
       input: {
         method: r.variables.original_method,
-        headers: r.headersIn,
+        headers: {
+          'user-agent': r.headersIn['user-agent'],
+          'origin': r.headersIn['origin'],
+        },
         query: qs.parse(r.variables.original_args),
         domain: r.variables.domain,
       },
