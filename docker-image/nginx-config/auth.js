@@ -12,6 +12,12 @@ async function opaAuth(r) {
         headers: {
           'user-agent': r.headersIn['user-agent'],
           'origin': r.headersIn['origin'],
+          'x-api-key': r.headersIn['x-api-key'],
+          'host': r.headersIn['host'],
+          'referrer': r.headersIn['referer'],
+          'x-forwarded-for': r.headersIn['x-forwarded-for'],
+          'x-forwarded-host': r.headersIn['x-forwarded-host'],
+          'x-forwarded-proto': r.headersIn['x-forwarded-proto'],
         },
         query: qs.parse(r.variables.original_args),
         domain: r.variables.domain,
