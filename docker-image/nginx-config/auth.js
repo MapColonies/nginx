@@ -6,11 +6,6 @@ async function opaAuth(r) {
       return r.return(204);
     }
 
-    const headers = {
-      'x-request-id': r.headersIn['x-request-id'],
-      'traceparent': r.headersIn['traceparent']
-    };
-
     const body = {
       input: {
         method: r.variables.original_method,
@@ -39,7 +34,6 @@ async function opaAuth(r) {
     };
 
     const response = await r.subrequest("/opa", {
-      headers: JSON.stringify(headers),
       body: JSON.stringify(body),
       method: "POST",
     });
