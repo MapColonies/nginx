@@ -6,18 +6,32 @@ async function opaAuth(r) {
       return r.return(204);
     }
 
+    const headers = {
+      'x-request-id': r.headersIn['x-request-id'],
+      'traceparent': r.headersIn['traceparent']
+    };
+
     const body = {
       input: {
         method: r.variables.original_method,
         headers: {
           'user-agent': r.headersIn['user-agent'],
           'origin': r.headersIn['origin'],
+          'referer': r.headersIn['referer'],
+          
+          // --- Custom Authentication ---
           'x-api-key': r.headersIn['x-api-key'],
+                    
+          // --- Routing & Proxy Context ---
           'host': r.headersIn['host'],
-          'referrer': r.headersIn['referer'],
           'x-forwarded-for': r.headersIn['x-forwarded-for'],
           'x-forwarded-host': r.headersIn['x-forwarded-host'],
           'x-forwarded-proto': r.headersIn['x-forwarded-proto'],
+          'x-real-ip': r.headersIn['x-real-ip'],
+                    
+          // --- Payload Context ---
+          'content-type': r.headersIn['content-type'],
+          'content-length': r.headersIn['content-length'],
         },
         query: qs.parse(r.variables.original_args),
         domain: r.variables.domain,
@@ -25,6 +39,7 @@ async function opaAuth(r) {
     };
 
     const response = await r.subrequest("/opa", {
+      headers: JSON.stringify(headers),
       body: JSON.stringify(body),
       method: "POST",
     });
