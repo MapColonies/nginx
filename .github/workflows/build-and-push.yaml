@@ -3,7 +3,7 @@ name: Build and push helm chart
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 jobs:
   build_and_push:
@@ -15,13 +15,13 @@ jobs:
           registry: ${{ secrets.ACR_URL }}
           username: ${{ secrets.ACR_PUSH_USER }}
           password: ${{ secrets.ACR_PUSH_TOKEN }}
-      
       - name: build_docker_image
         id: docker_build
         uses: MapColonies/shared-workflows/actions/build-docker@build-docker-v1
         with:
           registry: ${{ secrets.ACR_URL }}
           domain: common
+          context: docker-image
 
       - name: push_docker_image
         uses: MapColonies/shared-workflows/actions/push-docker@push-docker-v1
