@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.1](https://github.com/MapColonies/nginx/compare/v2.1.0...v2.1.1) (2026-03-19)
+
+
+### Bug Fixes
+
+* update OpenTelemetry field names in log format configuration ([#25](https://github.com/MapColonies/nginx/issues/25)) ([882f11e](https://github.com/MapColonies/nginx/commit/882f11ea0520719171cbcad70b8e913f9a34e5c9))
+
 ## [2.1.0](https://github.com/MapColonies/nginx/compare/v2.0.0...v2.1.0) (2025-09-10)
 
 
