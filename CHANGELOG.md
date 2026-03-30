@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.2](https://github.com/MapColonies/nginx/compare/v2.1.1...v2.1.2) (2026-03-30)
+
+
+### Bug Fixes
+
+* **auth:** pass specific headers to OPA subrequest ([#22](https://github.com/MapColonies/nginx/issues/22)) ([d32d99c](https://github.com/MapColonies/nginx/commit/d32d99c171571d0215064fbc2d109aef1a62f2c3))
+* **log format:** log format doesn't uphold opentelemetry field naming (MAPCO-8460) ([#17](https://github.com/MapColonies/nginx/issues/17)) ([3a03e84](https://github.com/MapColonies/nginx/commit/3a03e849e64f62bcea5ecdaf09b7ad333d428f18))
+
 ## [2.1.1](https://github.com/MapColonies/nginx/compare/v2.1.0...v2.1.1) (2026-03-19)
 
 
