@@ -48,8 +48,9 @@ caKey: "ca.crt"
 image:
   # -- Docker image name
   repository: nginx
+  # If commented, appVersion will be taken. See: _helpers.tpl
   # -- Docker image tag
-  tag: "latest"
+  # tag: "latest"
 # -- Port on which the application will listen
 port: 8080
 # -- Port to which the service will forward traffic
@@ -122,7 +123,6 @@ opentelemetry:
   samplerMethod: "AlwaysOff" # AlwaysOn, AlwaysOff, TraceIdRatioBased
   # -- OpenTelemetry sampling ratio
   ratio: 10 # between 0 and 1
-  # -- Use OpenTelemetry parnet-based sampling
 
 # @section -- Nginx Configuration
 nginx:
