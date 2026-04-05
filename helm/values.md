@@ -45,7 +45,10 @@ A Helm chart for nginx
 | ingress.tls.secretName | string | `""` | Secret name of ingress that points to the relevant custom certificates |
 | initialDelaySeconds | int | `60` | Initial delay in seconds before the readiness probe starts |
 | nameOverride | string | `""` | String to partially override fullname template (will maintain the release name) |
+| nginx.allowedHeaders | string | `nil` | Allowed headers (comma-seperated, for the header: Access-Control-Allow-Headers) |
+| nginx.allowedOrigins | string | `nil` | Allowed origins (comma-seperated, for the header: Access-Control-Allow-Origin) |
 | nginx.maxAge | string | `nil` | Maximum age of the cache in seconds (for the header: Access-Control-Max-Age) |
+| nginx.optionsMaxAge | string | `nil` | Maximum age of the OPTIONS cache in seconds (for the header: Access-Control-Max-Age) |
 | nodePort | int | `30001` | Port to expose on each node for NodePort service type |
 | opentelemetry.exporterPort | int | `4317` | OpenTelemetry Collector endpoint address exporterHost: "localhost" |
 | opentelemetry.ratio | int | `10` | OpenTelemetry sampling ratio |
