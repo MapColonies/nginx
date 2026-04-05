@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.1.3](https://github.com/MapColonies/nginx/compare/v2.1.2...v2.1.3) (2026-04-05)
+
+
+### Helm Changes
+
+* fix image version resolution ([#28](https://github.com/MapColonies/nginx/issues/28)) ([4e66eeb](https://github.com/MapColonies/nginx/commit/4e66eeb3373413e66d62293b33cf0b431aef3bb4))
+* handle OPTIONS requests and allow setting allow headers and origins headers ([#29](https://github.com/MapColonies/nginx/issues/29)) ([60c6434](https://github.com/MapColonies/nginx/commit/60c64342041f893a1acd5844911d2009a8b51514))
+
 ## [2.1.2](https://github.com/MapColonies/nginx/compare/v2.1.1...v2.1.2) (2026-03-30)
 
 
