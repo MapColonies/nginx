@@ -128,6 +128,12 @@ opentelemetry:
 nginx:
   # -- Maximum age of the cache in seconds (for the header: Access-Control-Max-Age)
   maxAge:
+  # -- Allowed origins (comma-seperated, for the header: Access-Control-Allow-Origin)
+  allowedOrigins:
+  # -- Allowed headers (comma-seperated, for the header: Access-Control-Allow-Headers)
+  allowedHeaders:
+  # -- Maximum age of the OPTIONS cache in seconds (for the header: Access-Control-Max-Age)
+  optionsMaxAge:
 
   # @section -- NGINX-Prometheus-Exporter Parameters
 prometheusExporter:
