@@ -32,7 +32,7 @@ A Helm chart for nginx
 | global.metrics | object | `{}` | Configuration for metrics collection. |
 | global.tracing | object | `{}` | Configuration for distributed tracing. |
 | image.repository | string | `"nginx"` | Docker image name |
-| image.tag | string | `"latest"` | Docker image tag |
+| image.tag | string | `""` | Docker image tag. If no value is specified, appVersion will be taken. |
 | imagePullPolicy | string | `"Always"` | Image pull policy for all containers in the deployment |
 | ingress.additionalAnnotations | string | `nil` | Additional annotations for ingress |
 | ingress.domain | string | `""` | Domain of ingress |

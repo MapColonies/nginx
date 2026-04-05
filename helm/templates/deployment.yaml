@@ -1,6 +1,7 @@
 {{- if .Values.enabled -}}
 {{- $fullName := include "nginx.fullname" . -}}
 {{- $chartName := include "nginx.name" . -}}
+{{- $tag := include "nginx.tag" . -}}
 {{- $cloudProviderDockerRegistryUrl := include "nginx.cloudProviderDockerRegistryUrl" . -}}
 {{- $cloudProviderImagePullSecretName := include "nginx.cloudProviderImagePullSecretName" . -}}
 {{- $prometheusExporterPort := include "prometheusExporter.targetPort" . -}}
@@ -51,7 +52,7 @@ spec:
       containers:
         - name: {{ $fullName | quote }}
           {{- with .Values.image }}
-          image: {{ $cloudProviderDockerRegistryUrl }}{{ .repository }}:{{ .tag }}
+          image: {{ $cloudProviderDockerRegistryUrl }}{{ .repository }}:{{ $tag }}
           {{- end }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           volumeMounts:
