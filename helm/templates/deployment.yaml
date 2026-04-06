@@ -71,9 +71,9 @@ spec:
               mountPath: "/etc/nginx/log_format.conf"
               subPath: log_format.conf
             {{- end -}}
-              {{- if .Values.extraVolumeMounts }}
-                {{ toYaml .Values.extraVolumeMounts | nindent 12 }}
-              {{- end }} 
+            {{- if .Values.extraVolumeMounts }}
+              {{ toYaml .Values.extraVolumeMounts | nindent 12 }}
+            {{- end }} 
           ports:
             - name: http
               containerPort: {{ .Values.targetPort }}
