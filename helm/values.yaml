@@ -136,6 +136,8 @@ nginx:
   allowedOrigins:
   # -- Allowed headers, default: * (comma-seperated, for the header: Access-Control-Allow-Headers)
   allowedHeaders:
+  # -- Allowed methods, default: GET, OPTIONS (comma-seperated, for the header: Access-Control-Allow-Methods)
+  allowedMethods:
   # -- Maximum age of the OPTIONS cache in seconds (for the header: Access-Control-Max-Age)
   optionsMaxAge:
 
