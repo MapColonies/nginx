@@ -46,7 +46,7 @@ A Helm chart for nginx
 | initialDelaySeconds | int | `60` | Initial delay in seconds before the readiness probe starts |
 | nameOverride | string | `""` | String to partially override fullname template (will maintain the release name) |
 | nginx.additionalConf.enabled | bool | `false` | Enable or disable the inclusion of an additional configuration file in the NGINX configuration |
-| nginx.additionalConf.fileName | string | `"additional.conf"` | Name of the additional configuration file to be included in the NGINX configuration (should be mounted to the "config" directory) |
+| nginx.additionalConf.fileName | string | `"additional.conf"` | Name of the additional configuration file to be included in the NGINX configuration (should be mounted to the "config"/server directory) |
 | nginx.allowedHeaders | string | `nil` | Allowed headers, default: * (comma-seperated, for the header: Access-Control-Allow-Headers) |
 | nginx.allowedMethods | string | `nil` | Allowed methods, default: GET, OPTIONS (comma-seperated, for the header: Access-Control-Allow-Methods) |
 | nginx.allowedOrigins | string | `nil` | Allowed origins, default: * (comma-seperated, for the header: Access-Control-Allow-Origin) |
