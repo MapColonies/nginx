@@ -128,7 +128,7 @@ nginx:
   additionalRootConf:
     # -- Enable or disable the inclusion of an additional configuration file for extending the root path
     enabled: false
-    # -- Name of the additional configuration file to be included in the NGINX root path configuration (should be mounted to the "config" directory)
+    # -- Name of the additional configuration file to be included in the NGINX root path configuration (should be mounted to the "config"/root directory)
     fileName: additionalRootConf.conf
   additionalConf:
     # -- Enable or disable the inclusion of an additional configuration file in the NGINX configuration
