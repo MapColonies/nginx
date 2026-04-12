@@ -128,7 +128,7 @@ nginx:
   additionalConf:
     # -- Enable or disable the inclusion of an additional configuration file in the NGINX configuration
     enabled: false
-    # -- Name of the additional configuration file to be included in the NGINX configuration (should be mounted to the "config" directory)
+    # -- Name of the additional configuration file to be included in the NGINX configuration (should be mounted to the "config"/server directory)
     fileName: additional.conf
   # -- Maximum age of the cache in seconds (for the header: Access-Control-Max-Age)
   maxAge:
