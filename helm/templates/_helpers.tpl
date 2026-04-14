@@ -40,6 +40,7 @@ helm.sh/chart: {{ include "nginx.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{ include "mclabels.labels" . }}
 {{- end }}
 
 {{/*
@@ -55,6 +56,7 @@ Selector labels
 {{- define "nginx.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "nginx.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
+{{- include "mclabels.selectorLabels" . }}
 {{- end }}
 
 {{/*
@@ -102,13 +104,6 @@ Returns the cloud provider image pull secret name from global if exists or from 
 {{- else if .Values.cloudProvider.imagePullSecretName -}}
     {{- .Values.cloudProvider.imagePullSecretName -}}
 {{- end -}}
-{{- end -}}
-
-{{/*
-Returns the port for NGINX Prometheus Exporter
-*/}}
-{{- define "prometheusExporter.targetPort" -}}
-    {{- printf "9113" -}}
 {{- end -}}
 
 {{/*

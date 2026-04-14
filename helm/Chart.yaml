@@ -6,3 +6,7 @@ version: 2.1.3
 appVersion: 2.1.3
 annotations:
   domain: common
+dependencies:
+  - name: mclabels
+    version: 1.0.1
+    repository: oci://acrarolibotnonprod.azurecr.io/helm/infra
