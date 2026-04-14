@@ -23,6 +23,7 @@ spec:
       app: {{ $fullName | quote }}
       release: {{ .Release.Name }}
       run: {{ .Release.Name }}-nginx
+      {{- include "nginx.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
