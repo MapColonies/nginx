@@ -4,6 +4,12 @@
 
 A Helm chart for nginx
 
+## Requirements
+
+| Repository | Name | Version |
+|------------|------|---------|
+| oci://acrarolibotnonprod.azurecr.io/helm/infra | mclabels | 1.0.1 |
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -44,6 +50,13 @@ A Helm chart for nginx
 | ingress.tls.enabled | bool | `false` | Use ingress over HTTPS |
 | ingress.tls.secretName | string | `""` | Secret name of ingress that points to the relevant custom certificates |
 | initialDelaySeconds | int | `60` | Initial delay in seconds before the readiness probe starts |
+| mclabels.component | string | `"proxy-server"` |  |
+| mclabels.environment | string | `"development"` |  |
+| mclabels.logScraping | bool | `true` |  |
+| mclabels.owner | string | `"common"` |  |
+| mclabels.partOf | string | `"nginx"` |  |
+| mclabels.prometheus.enabled | bool | `true` |  |
+| mclabels.prometheus.port | int | `9113` |  |
 | nameOverride | string | `""` | String to partially override fullname template (will maintain the release name) |
 | nginx.additionalConf.enabled | bool | `false` | Enable or disable the inclusion of an additional configuration file in the NGINX configuration |
 | nginx.additionalConf.fileName | string | `"additional.conf"` | Name of the additional configuration file to be included in the NGINX configuration (should be mounted to the "config" directory) |
@@ -58,9 +71,9 @@ A Helm chart for nginx
 | opentelemetry.samplerMethod | string | `"AlwaysOff"` | OpenTelemetry sampling method |
 | opentelemetry.serviceName | string | `"nginx"` | OpenTelemetry service name to be associated your NGINX application |
 | port | int | `8080` | Port on which the application will listen |
-| prometheusExporter.enabled | bool | `false` | Enable or disable the Prometheus exporter sidecar |
+| prometheusExporter.enabled | bool | `true` | Enable or disable the Prometheus exporter sidecar |
 | prometheusExporter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the Prometheus exporter |
-| prometheusExporter.image.repository | string | `"nginx/nginx-prometheus-exporter"` | Docker image name for the Prometheus exporter |
+| prometheusExporter.image.repository | string | `"common/nginx/nginx-prometheus-exporter"` | Docker image name for the Prometheus exporter |
 | prometheusExporter.image.tag | string | `"latest"` | Docker image tag for the Prometheus exporter |
 | prometheusExporter.resources.enabled | bool | `true` | Enable or disable resource limits and requests |
 | prometheusExporter.resources.value.limits.cpu | string | `"100m"` | CPU limit for the main container |
