@@ -126,13 +126,18 @@ opentelemetry:
 # @section -- Nginx Configuration
 nginx:
   extensions:
+    http:
+      # -- Enable or disable the inclusion of an additional configuration file in the HTTP context of NGINX configuration
+      enabled: false
+      # -- Name of the additional configuration file to be included in the HTTP context of NGINX configuration (should be mounted to the "config"/extensions directory)
+      fileName: http.conf
     server:
-      # -- Enable or disable the inclusion of an additional configuration file in the NGINX configuration
+      # -- Enable or disable the inclusion of an additional configuration file in the SERVER context of NGINX configuration
       enabled: false
       # -- Name of the additional configuration file to be included in the NGINX configuration (should be mounted to the "config"/extensions directory)
       fileName: server.conf
     location:
-      # -- Enable or disable the inclusion of an additional configuration file for extending the root path
+      # -- Enable or disable the inclusion of an additional configuration file in the ROOT PATH context of NGINX configuration
       enabled: false
       # -- Name of the additional configuration file to be included in the NGINX root path configuration (should be mounted to the "config"/extensions directory)
       fileName: location.conf
