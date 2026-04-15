@@ -4,7 +4,7 @@
 {{- $releaseName := .Release.Name -}}
 {{- $chartName := include "nginx.name" . -}}
 {{- $cloudProviderFlavor := include "nginx.cloudProviderFlavor" . -}}
-{{- $prometheusExporterPort := include "prometheusExporter.targetPort" . -}}
+{{- $prometheusExporterPort := .Values.mclabels.prometheus.port -}}
 apiVersion: v1
 kind: Service
 metadata:

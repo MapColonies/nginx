@@ -11,6 +11,16 @@ global:
     # -- Domain name for the ingress.
     domain: ""
 
+mclabels:
+  environment: development
+  owner: common
+  partOf: nginx
+  component: proxy-server
+  prometheus:
+    enabled: true
+    port: 9113
+  logScraping: true
+
 # -- Enable or disable the deployment of this chart
 enabled: true
 # -- Specify the environment for this deployment
@@ -150,10 +160,10 @@ nginx:
   # @section -- NGINX-Prometheus-Exporter Parameters
 prometheusExporter:
   # -- Enable or disable the Prometheus exporter sidecar
-  enabled: false
+  enabled: true
   image:
     # -- Docker image name for the Prometheus exporter
-    repository: nginx/nginx-prometheus-exporter
+    repository: common/nginx/nginx-prometheus-exporter
     # -- Docker image tag for the Prometheus exporter
     tag: latest
     # -- Image pull policy for the Prometheus exporter

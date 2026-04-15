@@ -4,7 +4,7 @@
 {{- $tag := include "nginx.tag" . -}}
 {{- $cloudProviderDockerRegistryUrl := include "nginx.cloudProviderDockerRegistryUrl" . -}}
 {{- $cloudProviderImagePullSecretName := include "nginx.cloudProviderImagePullSecretName" . -}}
-{{- $prometheusExporterPort := include "prometheusExporter.targetPort" . -}}
+{{- $prometheusExporterPort := .Values.mclabels.prometheus.port -}}
 {{- $listOfSubPaths := include "listOfSubPaths" . | fromJsonArray -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -30,13 +30,10 @@ spec:
         release: {{ .Release.Name }}
         run: {{ .Release.Name }}-nginx
       annotations:
-        {{- if .Values.prometheusExporter.enabled }}
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: {{ $prometheusExporterPort | quote }}
-        {{- end}}
         {{- if .Values.additionalPodAnnotations }}
         {{- toYaml .Values.additionalPodAnnotations | nindent 8 }}
         {{- end }}
+        {{- include "mclabels.annotations" . | nindent 8 }}
     spec:
     {{- if $cloudProviderImagePullSecretName }}
       imagePullSecrets:

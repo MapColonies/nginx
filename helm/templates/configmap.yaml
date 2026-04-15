@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: {{ printf "%s-base-configmap" (include "nginx.fullname" .) }}
   labels:
-    {{- include "nginx.labels" . | nindent 4 }}  
+    {{- include "nginx.labels" . | nindent 4 }}
 data:
   default.conf: {{ tpl (.Files.Get "config/default.conf") . | quote }}
   nginx.conf: {{ tpl (.Files.Get "config/nginx.conf") . | quote }}
