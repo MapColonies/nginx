@@ -1,16 +1,14 @@
-name: PR Author Auto Assign
+name: Auto Author Assign
 
 on:
   pull_request_target:
-    types: [opened, reopened]
+    types: [ opened, reopened ]
 
 permissions:
   pull-requests: write
 
 jobs:
   assign-author:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
-      - uses: toshimaru/auto-author-assign@v2.1.1
-        with:
-          repo-token: ${{ secrets.GH_PAT }}
+      - uses: toshimaru/auto-author-assign@v3.0.1
