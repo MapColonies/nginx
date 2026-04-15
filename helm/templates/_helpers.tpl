@@ -124,6 +124,16 @@ Returns the port for NGINX Prometheus Exporter
 {{- end -}}
 
 {{/*
+Generate OpenTelemetry ratio sampler split_clients block
+*/}}
+{{- define "nginx.otelRatioSampler" -}}
+split_clients "$otel_trace_id" $ratio_sampler {
+              {{ .Values.opentelemetry.ratio }}%              on;
+              *                off;
+}
+{{- end -}}
+
+{{/*
 Generate OpenTelemetry trace configuration
 */}}
 {{- define "nginx.otelTrace" -}}
