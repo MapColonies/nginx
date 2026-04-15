@@ -48,9 +48,11 @@ A Helm chart for nginx
 | nginx.allowedHeaders | string | `nil` | Allowed headers, default: * (comma-seperated, for the header: Access-Control-Allow-Headers) |
 | nginx.allowedMethods | string | `nil` | Allowed methods, default: GET, OPTIONS (comma-seperated, for the header: Access-Control-Allow-Methods) |
 | nginx.allowedOrigins | string | `nil` | Allowed origins, default: * (comma-seperated, for the header: Access-Control-Allow-Origin) |
-| nginx.extensions.location.enabled | bool | `false` | Enable or disable the inclusion of an additional configuration file for extending the root path |
+| nginx.extensions.http.enabled | bool | `false` | Enable or disable the inclusion of an additional configuration file in the HTTP context of NGINX configuration |
+| nginx.extensions.http.fileName | string | `"http.conf"` | Name of the additional configuration file to be included in the HTTP context of NGINX configuration (should be mounted to the "config"/extensions directory) |
+| nginx.extensions.location.enabled | bool | `false` | Enable or disable the inclusion of an additional configuration file in the ROOT PATH context of NGINX configuration |
 | nginx.extensions.location.fileName | string | `"location.conf"` | Name of the additional configuration file to be included in the NGINX root path configuration (should be mounted to the "config"/extensions directory) |
-| nginx.extensions.server.enabled | bool | `false` | Enable or disable the inclusion of an additional configuration file in the NGINX configuration |
+| nginx.extensions.server.enabled | bool | `false` | Enable or disable the inclusion of an additional configuration file in the SERVER context of NGINX configuration |
 | nginx.extensions.server.fileName | string | `"server.conf"` | Name of the additional configuration file to be included in the NGINX configuration (should be mounted to the "config"/extensions directory) |
 | nginx.maxAge | string | `nil` | Maximum age of the cache in seconds (for the header: Access-Control-Max-Age) |
 | nginx.optionsMaxAge | string | `nil` | Maximum age of the OPTIONS cache in seconds (for the header: Access-Control-Max-Age) |
