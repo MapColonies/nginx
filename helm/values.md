@@ -47,6 +47,8 @@ A Helm chart for nginx
 | nameOverride | string | `""` | String to partially override fullname template (will maintain the release name) |
 | nginx.additionalConf.enabled | bool | `false` | Enable or disable the inclusion of an additional configuration file in the NGINX configuration |
 | nginx.additionalConf.fileName | string | `"additional.conf"` | Name of the additional configuration file to be included in the NGINX configuration (should be mounted to the "config"/extensions directory) |
+| nginx.additionalRootConf.enabled | bool | `false` | Enable or disable the inclusion of an additional configuration file for extending the root path |
+| nginx.additionalRootConf.fileName | string | `"additionalRootConf.conf"` | Name of the additional configuration file to be included in the NGINX root path configuration (should be mounted to the "config"/root directory) |
 | nginx.allowedHeaders | string | `nil` | Allowed headers, default: * (comma-seperated, for the header: Access-Control-Allow-Headers) |
 | nginx.allowedMethods | string | `nil` | Allowed methods, default: GET, OPTIONS (comma-seperated, for the header: Access-Control-Allow-Methods) |
 | nginx.allowedOrigins | string | `nil` | Allowed origins, default: * (comma-seperated, for the header: Access-Control-Allow-Origin) |
