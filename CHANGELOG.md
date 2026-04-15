@@ -1,5 +1,21 @@
 # Changelog
 
+## [2.1.4](https://github.com/MapColonies/nginx/compare/v2.1.3...v2.1.4) (2026-04-15)
+
+
+### Helm Changes
+
+* add labels and selector labels ([#38](https://github.com/MapColonies/nginx/issues/38)) ([b12d0bf](https://github.com/MapColonies/nginx/commit/b12d0bf8d779bcc8bda7fb078a854806d88f700b))
+* add mc labels and annotations ([#39](https://github.com/MapColonies/nginx/issues/39)) ([13b31cc](https://github.com/MapColonies/nginx/commit/13b31ccbc525fd78f2d40a889c0db6c59d9f00c9))
+* allow adding additional nginx conf ([#32](https://github.com/MapColonies/nginx/issues/32)) ([3522a30](https://github.com/MapColonies/nginx/commit/3522a3093defd1192569c9fb9f2fe7b9f397a016))
+* allow expanding NGINX configuration ([#35](https://github.com/MapColonies/nginx/issues/35)) ([f54e987](https://github.com/MapColonies/nginx/commit/f54e9878ed66e513538f043f811db81755a5c83b))
+
+
+### Code Refactoring
+
+* **helm:** move OpenTelemetry  otelRatioSampler to helpers and update nginx.conf ([#37](https://github.com/MapColonies/nginx/issues/37)) ([0a8f7fa](https://github.com/MapColonies/nginx/commit/0a8f7fa8e766164630cee51352ed02eb52f3350b))
+* **helm:** move otel_trace directive to server scope ([#34](https://github.com/MapColonies/nginx/issues/34)) ([563e08c](https://github.com/MapColonies/nginx/commit/563e08ca7b57b539e1253dc3d2620c45763a268c))
+
 ## [2.1.3](https://github.com/MapColonies/nginx/compare/v2.1.2...v2.1.3) (2026-04-05)
 
 
