@@ -125,16 +125,17 @@ opentelemetry:
 
 # @section -- Nginx Configuration
 nginx:
-  additionalRootConf:
-    # -- Enable or disable the inclusion of an additional configuration file for extending the root path
-    enabled: false
-    # -- Name of the additional configuration file to be included in the NGINX root path configuration (should be mounted to the "config"/root directory)
-    fileName: additionalRootConf.conf
-  additionalConf:
-    # -- Enable or disable the inclusion of an additional configuration file in the NGINX configuration
-    enabled: false
-    # -- Name of the additional configuration file to be included in the NGINX configuration (should be mounted to the "config"/extensions directory)
-    fileName: additional.conf
+  extensions:
+    server:
+      # -- Enable or disable the inclusion of an additional configuration file in the NGINX configuration
+      enabled: false
+      # -- Name of the additional configuration file to be included in the NGINX configuration (should be mounted to the "config"/extensions directory)
+      fileName: server.conf
+    location:
+      # -- Enable or disable the inclusion of an additional configuration file for extending the root path
+      enabled: false
+      # -- Name of the additional configuration file to be included in the NGINX root path configuration (should be mounted to the "config"/extensions directory)
+      fileName: location.conf
   # -- Maximum age of the cache in seconds (for the header: Access-Control-Max-Age)
   maxAge:
   # -- Allowed origins, default: * (comma-seperated, for the header: Access-Control-Allow-Origin)
