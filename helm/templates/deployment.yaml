@@ -23,12 +23,14 @@ spec:
       app: {{ $fullName | quote }}
       release: {{ .Release.Name }}
       run: {{ .Release.Name }}-nginx
+      {{- include "nginx.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
         app: {{ $fullName | quote }}
         release: {{ .Release.Name }}
         run: {{ .Release.Name }}-nginx
+        {{- include "nginx.labels" . | nindent 8 }}
       annotations:
         {{- if .Values.additionalPodAnnotations }}
         {{- toYaml .Values.additionalPodAnnotations | nindent 8 }}
