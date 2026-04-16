@@ -59,7 +59,7 @@ image:
   # -- Docker image name
   repository: nginx
   # -- Docker image tag. If no value is specified, appVersion will be taken.
-  tag: ''
+  tag: ""
 # -- Port on which the application will listen
 port: 8080
 # -- Port to which the service will forward traffic
@@ -116,6 +116,8 @@ extraVolumeMounts: []
 sidecars: ""
 
 backend:
+  # -- Enable or disable the proxy_pass to the backend service
+  enabled: false
   # -- Backend service name for proxy_pass
   host: "backend-service"
   # -- Backend service port
