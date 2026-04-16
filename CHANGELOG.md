@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.5](https://github.com/MapColonies/nginx/compare/v2.1.4...v2.1.5) (2026-04-16)
+
+
+### Helm Changes
+
+* allow disabling backend service ([#42](https://github.com/MapColonies/nginx/issues/42)) ([74f7089](https://github.com/MapColonies/nginx/commit/74f708975bcd9ccaf9526cac61102cffbaed27d6))
+
 ## [2.1.4](https://github.com/MapColonies/nginx/compare/v2.1.3...v2.1.4) (2026-04-15)
 
 
