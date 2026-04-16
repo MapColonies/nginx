@@ -18,6 +18,7 @@ A Helm chart for nginx
 | authorization.domain | string | `"example"` | Your authorization domain |
 | authorization.enabled | bool | `true` | Use authroization mechanism |
 | authorization.url | string | `"http://localhost:8181/v1/data/http/authz/decision"` | Authorization endpoint |
+| backend.enabled | bool | `false` | Enable or disable the proxy_pass to the backend service |
 | backend.host | string | `"backend-service"` | Backend service name for proxy_pass |
 | backend.port | int | `8080` | Backend service port |
 | caKey | string | `"ca.crt"` | Key in the CA secret that contains the certificate data |
