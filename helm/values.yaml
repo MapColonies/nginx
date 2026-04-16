@@ -116,8 +116,10 @@ extraVolumeMounts: []
 sidecars: ""
 
 backend:
+  # -- Enable or disable the backend service
+  enabled: true
   # -- Backend service name for proxy_pass
-  host: "backend-service"
+  host: ''
   # -- Backend service port
   port: 8080
 
