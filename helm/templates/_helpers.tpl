@@ -139,4 +139,5 @@ otel_trace $ratio_sampler;
 {{- else -}}
 otel_trace off;
 {{- end -}}
+otel_trace_context propagate;
 {{- end -}}
