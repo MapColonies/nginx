@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.6](https://github.com/MapColonies/nginx/compare/v2.1.5...v2.1.6) (2026-04-26)
+
+
+### Helm Changes
+
+* pass trace context to backend ([#45](https://github.com/MapColonies/nginx/issues/45)) ([79cda9e](https://github.com/MapColonies/nginx/commit/79cda9e9bca0bf5b122719f1883de2ea6dc66beb))
+
 ## [2.1.5](https://github.com/MapColonies/nginx/compare/v2.1.4...v2.1.5) (2026-04-16)
 
 

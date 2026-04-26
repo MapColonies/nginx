@@ -2,8 +2,8 @@ apiVersion: v2
 name: nginx
 description: A Helm chart for nginx
 type: application
-version: 2.1.5
-appVersion: 2.1.5
+version: 2.1.6
+appVersion: 2.1.6
 annotations:
   domain: common
 dependencies:
