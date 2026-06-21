@@ -1,5 +1,51 @@
 import qs from "querystring";
 
+const DENYLIST = {
+  // Payloads
+  cookie: true,
+  authorization: true,
+
+  // Connection / Hop-by-Hop (Network Noise)
+  connection: true,
+  "keep-alive": true,
+  "transfer-encoding": true,
+  te: true,
+  trailer: true,
+  upgrade: true,
+
+  // Cache State (State Noise)
+  "cache-control": true,
+  pragma: true,
+  "if-match": true,
+  "if-none-match": true,
+  "if-modified-since": true,
+  "if-unmodified-since": true,
+
+  // Browser Privacy / Legacy (Unused Bloat)
+  dnt: true,
+  "sec-gpc": true,
+  "upgrade-insecure-requests": true,
+  "save-data": true,
+
+  // Legacy Tracing (Dropping B3/Zipkin, implicitly keeping Otel W3C)
+  b3: true,
+  "x-b3-traceid": true,
+  "x-b3-spanid": true,
+  "x-b3-sampled": true,
+};
+
+function filterHeaders(r) {
+  let cleanHeaders = {};
+
+  for (let header in r.headersIn) {
+    if (!DENYLIST[header.toLowerCase()]) {
+      cleanHeaders[header] = r.headersIn[header];
+    }
+  }
+
+  return cleanHeaders;
+}
+
 async function opaAuth(r) {
   try {
     if (r.variables.original_method == "OPTIONS") {
@@ -9,25 +55,7 @@ async function opaAuth(r) {
     const body = {
       input: {
         method: r.variables.original_method,
-        headers: {
-          'user-agent': r.headersIn['user-agent'],
-          'origin': r.headersIn['origin'],
-          'referer': r.headersIn['referer'],
-          
-          // --- Custom Authentication ---
-          'x-api-key': r.headersIn['x-api-key'],
-                    
-          // --- Routing & Proxy Context ---
-          'host': r.headersIn['host'],
-          'x-forwarded-for': r.headersIn['x-forwarded-for'],
-          'x-forwarded-host': r.headersIn['x-forwarded-host'],
-          'x-forwarded-proto': r.headersIn['x-forwarded-proto'],
-          'x-real-ip': r.headersIn['x-real-ip'],
-                    
-          // --- Payload Context ---
-          'content-type': r.headersIn['content-type'],
-          'content-length': r.headersIn['content-length'],
-        },
+        headers: filterHeaders(r),
         query: qs.parse(r.variables.original_args),
         domain: r.variables.domain,
       },
