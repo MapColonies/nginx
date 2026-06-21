@@ -4,7 +4,7 @@ const DENYLIST = {
   // Payloads
   cookie: true,
   authorization: true,
-
+  "proxy-authorization": true,
   // Connection / Hop-by-Hop (Network Noise)
   connection: true,
   "keep-alive": true,
