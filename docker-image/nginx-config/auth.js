@@ -34,15 +34,36 @@ const DENYLIST = {
   "x-b3-sampled": true,
 };
 
+// 2. Size Limit Configuration
+const MAX_HEADER_LENGTH = 2048;
+
+// 3. Exceptions to the size limit (Headers that are allowed to be large)
+const LENGTH_EXCEPTIONS = {
+  "x-api-key": true,
+  referer: true,
+};
+
 function filterHeaders(r) {
+  // Object.create(null) creates a pure dictionary with no prototype chain,
+  // protecting against prototype pollution/injection attacks.
   const cleanHeaders = Object.create(null);
 
   for (const header in r.headersIn) {
-    if (!Object.prototype.hasOwnProperty.call(r.headersIn, header)) continue;
+    // Protect against inherited properties injection
+    if (!Object.prototype.hasOwnProperty.call(r.headersIn, header)) {
+      continue;
+    }
 
     const key = header.toLowerCase();
+
     if (!DENYLIST[key]) {
-      cleanHeaders[key] = r.headersIn[header];
+      const headerValue = r.headersIn[header];
+
+      if (headerValue.length > MAX_HEADER_LENGTH && !LENGTH_EXCEPTIONS[key]) {
+        cleanHeaders[key] = "[REDACTED_SIZE_LIMIT]";
+      } else {
+        cleanHeaders[key] = headerValue;
+      }
     }
   }
 
