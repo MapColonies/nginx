@@ -35,11 +35,14 @@ const DENYLIST = {
 };
 
 function filterHeaders(r) {
-  let cleanHeaders = {};
+  const cleanHeaders = Object.create(null);
 
-  for (let header in r.headersIn) {
-    if (!DENYLIST[header.toLowerCase()]) {
-      cleanHeaders[header] = r.headersIn[header];
+  for (const header in r.headersIn) {
+    if (!Object.prototype.hasOwnProperty.call(r.headersIn, header)) continue;
+
+    const key = header.toLowerCase();
+    if (!DENYLIST[key]) {
+      cleanHeaders[key] = r.headersIn[header];
     }
   }
 
