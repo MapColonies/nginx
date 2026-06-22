@@ -57,7 +57,9 @@ function filterHeaders(r) {
     const key = header.toLowerCase();
 
     if (!DENYLIST[key]) {
-      const headerValue = r.headersIn[header];
+      const headerValue = Array.isArray(r.headersIn[header])
+        ? r.headersIn[header].join(", ")
+        : r.headersIn[header];
 
       if (headerValue.length > MAX_HEADER_LENGTH && !LENGTH_EXCEPTIONS[key]) {
         cleanHeaders[key] = "[REDACTED_SIZE_LIMIT]";
