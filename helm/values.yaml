@@ -167,7 +167,7 @@ prometheusExporter:
     # -- Docker image name for the Prometheus exporter
     repository: common/nginx-prometheus-exporter
     # -- Docker image tag for the Prometheus exporter
-    tag: latest
+    tag: 1.5.1
     # -- Image pull policy for the Prometheus exporter
     pullPolicy: IfNotPresent
   resources:
