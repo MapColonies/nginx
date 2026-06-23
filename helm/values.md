@@ -76,8 +76,8 @@ A Helm chart for nginx
 | port | int | `8080` | Port on which the application will listen |
 | prometheusExporter.enabled | bool | `true` | Enable or disable the Prometheus exporter sidecar |
 | prometheusExporter.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the Prometheus exporter |
-| prometheusExporter.image.repository | string | `"common/nginx/nginx-prometheus-exporter"` | Docker image name for the Prometheus exporter |
-| prometheusExporter.image.tag | string | `"latest"` | Docker image tag for the Prometheus exporter |
+| prometheusExporter.image.repository | string | `"common/nginx-prometheus-exporter"` | Docker image name for the Prometheus exporter |
+| prometheusExporter.image.tag | string | `"1.5.1"` | Docker image tag for the Prometheus exporter |
 | prometheusExporter.resources.enabled | bool | `true` | Enable or disable resource limits and requests |
 | prometheusExporter.resources.value.limits.cpu | string | `"100m"` | CPU limit for the main container |
 | prometheusExporter.resources.value.limits.memory | string | `"128Mi"` | Memory limit for the main container |
