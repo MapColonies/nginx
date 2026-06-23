@@ -49,7 +49,7 @@ spec:
             {{ tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
           {{- end }}
       containers:
-        - name: {{ .Values.nameOverride | default "nginx" }}
+        - name: nginx
           {{- with .Values.image }}
           image: {{ $cloudProviderDockerRegistryUrl }}{{ .repository }}:{{ $tag }}
           {{- end }}
