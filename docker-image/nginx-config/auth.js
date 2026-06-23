@@ -1,5 +1,77 @@
 import qs from "querystring";
 
+const DENYLIST = {
+  // Payloads
+  cookie: true,
+  authorization: true,
+  "proxy-authorization": true,
+  // Connection / Hop-by-Hop (Network Noise)
+  connection: true,
+  "keep-alive": true,
+  "transfer-encoding": true,
+  te: true,
+  trailer: true,
+  upgrade: true,
+
+  // Cache State (State Noise)
+  "cache-control": true,
+  pragma: true,
+  "if-match": true,
+  "if-none-match": true,
+  "if-modified-since": true,
+  "if-unmodified-since": true,
+
+  // Browser Privacy / Legacy (Unused Bloat)
+  dnt: true,
+  "sec-gpc": true,
+  "upgrade-insecure-requests": true,
+  "save-data": true,
+
+  // Legacy Tracing (Dropping B3/Zipkin, implicitly keeping Otel W3C)
+  b3: true,
+  "x-b3-traceid": true,
+  "x-b3-spanid": true,
+  "x-b3-sampled": true,
+};
+
+// 2. Size Limit Configuration
+const MAX_HEADER_LENGTH = 2048;
+
+// 3. Exceptions to the size limit (Headers that are allowed to be large)
+const LENGTH_EXCEPTIONS = {
+  "x-api-key": true,
+  referer: true,
+};
+
+function filterHeaders(r) {
+  // Object.create(null) creates a pure dictionary with no prototype chain,
+  // protecting against prototype pollution/injection attacks.
+  const cleanHeaders = Object.create(null);
+
+  for (const header in r.headersIn) {
+    // Protect against inherited properties injection
+    if (!Object.prototype.hasOwnProperty.call(r.headersIn, header)) {
+      continue;
+    }
+
+    const key = header.toLowerCase();
+
+    if (!DENYLIST[key]) {
+      const headerValue = Array.isArray(r.headersIn[header])
+        ? r.headersIn[header].join(", ")
+        : r.headersIn[header];
+
+      if (headerValue.length > MAX_HEADER_LENGTH && !LENGTH_EXCEPTIONS[key]) {
+        cleanHeaders[key] = "[REDACTED_SIZE_LIMIT]";
+      } else {
+        cleanHeaders[key] = headerValue;
+      }
+    }
+  }
+
+  return cleanHeaders;
+}
+
 async function opaAuth(r) {
   try {
     if (r.variables.original_method == "OPTIONS") {
@@ -9,25 +81,7 @@ async function opaAuth(r) {
     const body = {
       input: {
         method: r.variables.original_method,
-        headers: {
-          'user-agent': r.headersIn['user-agent'],
-          'origin': r.headersIn['origin'],
-          'referer': r.headersIn['referer'],
-          
-          // --- Custom Authentication ---
-          'x-api-key': r.headersIn['x-api-key'],
-                    
-          // --- Routing & Proxy Context ---
-          'host': r.headersIn['host'],
-          'x-forwarded-for': r.headersIn['x-forwarded-for'],
-          'x-forwarded-host': r.headersIn['x-forwarded-host'],
-          'x-forwarded-proto': r.headersIn['x-forwarded-proto'],
-          'x-real-ip': r.headersIn['x-real-ip'],
-                    
-          // --- Payload Context ---
-          'content-type': r.headersIn['content-type'],
-          'content-length': r.headersIn['content-length'],
-        },
+        headers: filterHeaders(r),
         query: qs.parse(r.variables.original_args),
         domain: r.variables.domain,
       },
