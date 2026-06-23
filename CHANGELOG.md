@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.1](https://github.com/MapColonies/nginx/compare/v2.2.0...v2.2.1) (2026-06-23)
+
+
+### Bug Fixes
+
+* **log format:** service name should be taken from name ovveride and default to nginx ([#51](https://github.com/MapColonies/nginx/issues/51)) ([19a5eca](https://github.com/MapColonies/nginx/commit/19a5eca60dbc67fd7e095474c753a060a745328a))
+
 ## [2.2.0](https://github.com/MapColonies/nginx/compare/v2.1.6...v2.2.0) (2026-06-23)
 
 
