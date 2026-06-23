@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.2.0](https://github.com/MapColonies/nginx/compare/v2.1.6...v2.2.0) (2026-06-23)
+
+
+### Features
+
+* changed opa headers mechanism from whitelist to blacklist ([#47](https://github.com/MapColonies/nginx/issues/47)) ([69de12f](https://github.com/MapColonies/nginx/commit/69de12f6f521925b4081257d62965f9a831fb507))
+
+
+### Helm Changes
+
+* move prometheus exporter image ([#49](https://github.com/MapColonies/nginx/issues/49)) ([f5cacc1](https://github.com/MapColonies/nginx/commit/f5cacc1126fb3ee30d2efc7c329bd609db912573))
+* set nginx app name ([#50](https://github.com/MapColonies/nginx/issues/50)) ([e46fed7](https://github.com/MapColonies/nginx/commit/e46fed7c5d67d03ef44c4ee95a72361c44bab4e5))
+
 ## [2.1.6](https://github.com/MapColonies/nginx/compare/v2.1.5...v2.1.6) (2026-04-26)
 
 
