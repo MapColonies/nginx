@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.2](https://github.com/MapColonies/nginx/compare/v2.2.1...v2.2.2) (2026-07-20)
+
+
+### Build System
+
+* upgrade nginx base image to 1.29.8-alpine3.23-otel ([#53](https://github.com/MapColonies/nginx/issues/53)) ([12725ef](https://github.com/MapColonies/nginx/commit/12725ef9b1e9ef132328042dbcd156bcc2296ec4))
+
 ## [2.2.1](https://github.com/MapColonies/nginx/compare/v2.2.0...v2.2.1) (2026-06-23)
 
 
