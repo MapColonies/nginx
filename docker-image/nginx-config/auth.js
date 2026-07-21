@@ -72,23 +72,25 @@ function filterHeaders(r) {
   return cleanHeaders;
 }
 
+function buildOpaBody(r) {
+  return JSON.stringify({
+    input: {
+      method: r.variables.original_method,
+      headers: filterHeaders(r),
+      query: qs.parse(r.variables.original_args),
+      domain: r.variables.domain,
+    },
+  });
+}
+
 async function opaAuth(r) {
   try {
     if (r.variables.original_method == "OPTIONS") {
       return r.return(204);
     }
 
-    const body = {
-      input: {
-        method: r.variables.original_method,
-        headers: filterHeaders(r),
-        query: qs.parse(r.variables.original_args),
-        domain: r.variables.domain,
-      },
-    };
-
     const response = await r.subrequest("/opa", {
-      body: JSON.stringify(body),
+      body: buildOpaBody(r),
       method: "POST",
     });
 
@@ -145,4 +147,4 @@ function jwtPayloadSub(r) {
   }
 }
 
-export default { opaAuth, jwtPayloadSub };
+export default { opaAuth, jwtPayloadSub, buildOpaBody };
