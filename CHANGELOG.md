@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.0](https://github.com/MapColonies/nginx/compare/v2.2.2...v2.3.0) (2026-07-21)
+
+
+### Features
+
+* **auth:** export buildOpaBody for reuse by dependent gateways ([#55](https://github.com/MapColonies/nginx/issues/55)) ([2c63219](https://github.com/MapColonies/nginx/commit/2c6321969ac0d13a3c6ef99cd2f31c1ab9517068))
+
 ## [2.2.2](https://github.com/MapColonies/nginx/compare/v2.2.1...v2.2.2) (2026-07-20)
 
 
