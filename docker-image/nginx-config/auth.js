@@ -72,9 +72,6 @@ function filterHeaders(r) {
   return cleanHeaders;
 }
 
-// Builds the OPA request body (as a JSON string) from the current request.
-// Exported so gateways that reuse this base image (e.g. nginx-s3-gateway)
-// send OPA an identical input contract instead of reconstructing it.
 function buildOpaBody(r) {
   return JSON.stringify({
     input: {
