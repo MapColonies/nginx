@@ -72,23 +72,28 @@ function filterHeaders(r) {
   return cleanHeaders;
 }
 
+// Builds the OPA request body (as a JSON string) from the current request.
+// Exported so gateways that reuse this base image (e.g. nginx-s3-gateway)
+// send OPA an identical input contract instead of reconstructing it.
+function buildOpaBody(r) {
+  return JSON.stringify({
+    input: {
+      method: r.variables.original_method,
+      headers: filterHeaders(r),
+      query: qs.parse(r.variables.original_args),
+      domain: r.variables.domain,
+    },
+  });
+}
+
 async function opaAuth(r) {
   try {
     if (r.variables.original_method == "OPTIONS") {
       return r.return(204);
     }
 
-    const body = {
-      input: {
-        method: r.variables.original_method,
-        headers: filterHeaders(r),
-        query: qs.parse(r.variables.original_args),
-        domain: r.variables.domain,
-      },
-    };
-
     const response = await r.subrequest("/opa", {
-      body: JSON.stringify(body),
+      body: buildOpaBody(r),
       method: "POST",
     });
 
@@ -145,4 +150,4 @@ function jwtPayloadSub(r) {
   }
 }
 
-export default { opaAuth, jwtPayloadSub };
+export default { opaAuth, jwtPayloadSub, buildOpaBody };
