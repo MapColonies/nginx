@@ -42,6 +42,9 @@ A Helm chart for nginx
 | fluentbit.accessLog.stdoutReadable | bool | `true` | When true, nginx writes a human-readable (combined-style) access log to stdout for kubectl logs; the JSON log always goes to Fluent Bit over syslog. When false, stdout also receives the JSON format. |
 | fluentbit.accessLog.syslogPort | int | `5514` | UDP port on loopback where Fluent Bit's syslog input listens and to which nginx forwards its JSON-formatted access log. |
 | fluentbit.enabled | bool | `false` | Enable or disable the optional Fluent Bit log-processing sidecar. When enabled, the central log-scraping label is forced off (no override) and the Prometheus scrape port is pointed at Fluent Bit's merged /metrics endpoint. When disabled (the default), the chart behaves exactly as before. |
+| fluentbit.errorLog.enabled | bool | `true` | Ship nginx error logs through a separate Fluent Bit pipeline (syslog input, plaintext parser, severity filter, OTLP output). Independent of the access-log pipeline. Only takes effect when fluentbit.enabled is also true. |
+| fluentbit.errorLog.minLevel | string | `"warn"` | Forward error-log records at or above this severity, applied natively by nginx's error_log directive (records below never leave nginx). Ordering: debug < info < notice < warn < error < crit < alert < emerg. The OSS image cannot emit `debug` (needs a debug-enabled build). |
+| fluentbit.errorLog.syslogPort | int | `5515` | UDP port on loopback where Fluent Bit's error-log syslog input listens and to which nginx forwards its error log. Distinct from accessLog.syslogPort. |
 | fluentbit.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the Fluent Bit sidecar |
 | fluentbit.image.repository | string | `"common/fluent-bit"` | Docker image name for the Fluent Bit sidecar |
 | fluentbit.image.tag | string | `"5.0.7"` | Docker image tag for the Fluent Bit sidecar |
