@@ -270,6 +270,11 @@ fluentbit:
     syslogPort: 5515
     # -- Forward error-log records at or above this severity, applied natively by nginx's error_log directive (records below never leave nginx). Ordering: debug < info < notice < warn < error < crit < alert < emerg. The OSS image cannot emit `debug` (needs a debug-enabled build).
     minLevel: warn
+  lua:
+    # -- Mount a custom Lua script into the Fluent Bit sidecar for advanced filtering (e.g. latency-threshold forwarding) with no chart change. When enabled, the script is added to the Fluent Bit ConfigMap and mounted at /fluent-bit/scripts/custom.lua; reference it from a `[FILTER] Name lua` block you supply. When disabled (the default), no Lua key or volumeMount is rendered.
+    enabled: false
+    # -- Inline Lua script (tpl-rendered, so it can reference `.Release.Name`, chart values, etc.) mounted at /fluent-bit/scripts/custom.lua. Only used when enabled.
+    script: ""
 
 authorization:
   # -- Use authroization mechanism
