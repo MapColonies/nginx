@@ -32,6 +32,16 @@ A Helm chart for nginx
 | environment | string | `"development"` | Specify the environment for this deployment |
 | extraVolumeMounts | list | `[]` | List of extra volumeMounts that are added to the NGINX container |
 | extraVolumes | list | `[]` | List of extra volumes that are added to the Deployment |
+| fluentbit.accessLog.metrics.port | int | `2021` | Port on which Fluent Bit serves the merged Prometheus /metrics endpoint. When the sidecar is enabled, this becomes the pod's advertised scrape port (mclabels.prometheus.port). |
+| fluentbit.enabled | bool | `false` | Enable or disable the optional Fluent Bit log-processing sidecar. When enabled, the central log-scraping label is forced off (no override) and the Prometheus scrape port is pointed at Fluent Bit's merged /metrics endpoint. When disabled (the default), the chart behaves exactly as before. |
+| fluentbit.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the Fluent Bit sidecar |
+| fluentbit.image.repository | string | `"common/fluent-bit"` | Docker image name for the Fluent Bit sidecar |
+| fluentbit.image.tag | string | `"5.0.7"` | Docker image tag for the Fluent Bit sidecar |
+| fluentbit.resources.enabled | bool | `true` | Enable or disable resource limits and requests for the Fluent Bit sidecar |
+| fluentbit.resources.value.limits.cpu | string | `"100m"` | CPU limit for the Fluent Bit sidecar |
+| fluentbit.resources.value.limits.memory | string | `"128Mi"` | Memory limit for the Fluent Bit sidecar |
+| fluentbit.resources.value.requests.cpu | string | `"100m"` | CPU request for the Fluent Bit sidecar |
+| fluentbit.resources.value.requests.memory | string | `"128Mi"` | Memory request for the Fluent Bit sidecar |
 | fullnameOverride | string | `""` | String to fully override fullname template |
 | global.cloudProvider | object | `{}` | Global cloud provider configuration. |
 | global.environment | string | `""` | Global environment setting. |
