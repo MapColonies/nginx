@@ -32,11 +32,19 @@ A Helm chart for nginx
 | environment | string | `"development"` | Specify the environment for this deployment |
 | extraVolumeMounts | list | `[]` | List of extra volumeMounts that are added to the NGINX container |
 | extraVolumes | list | `[]` | List of extra volumes that are added to the Deployment |
+| fluentbit.accessLog.forward.clientErrors | bool | `false` | Forward client errors (4xx) to central Alloy. |
+| fluentbit.accessLog.forward.serverErrors | bool | `true` | Forward server errors (5xx) to central Alloy. On by default so incident-relevant logs reach Loki with no configuration. |
+| fluentbit.accessLog.forward.statusCodes | list | `[]` | Extra explicit status codes to forward beyond the error classes, e.g. [429, 499]. Everything not matched by any rule is dropped. |
 | fluentbit.accessLog.metrics.port | int | `2021` | Port on which Fluent Bit serves the merged Prometheus /metrics endpoint. When the sidecar is enabled, this becomes the pod's advertised scrape port (mclabels.prometheus.port). |
+| fluentbit.accessLog.stdoutReadable | bool | `true` | When true, nginx writes a human-readable (combined-style) access log to stdout for kubectl logs; the JSON log always goes to Fluent Bit over syslog. When false, stdout also receives the JSON format. |
+| fluentbit.accessLog.syslogPort | int | `5514` | UDP port on loopback where Fluent Bit's syslog input listens and to which nginx forwards its JSON-formatted access log. |
 | fluentbit.enabled | bool | `false` | Enable or disable the optional Fluent Bit log-processing sidecar. When enabled, the central log-scraping label is forced off (no override) and the Prometheus scrape port is pointed at Fluent Bit's merged /metrics endpoint. When disabled (the default), the chart behaves exactly as before. |
 | fluentbit.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the Fluent Bit sidecar |
 | fluentbit.image.repository | string | `"common/fluent-bit"` | Docker image name for the Fluent Bit sidecar |
 | fluentbit.image.tag | string | `"5.0.7"` | Docker image tag for the Fluent Bit sidecar |
+| fluentbit.output.logs.host | string | `""` | Host of the dedicated central Alloy OTLP logs endpoint Fluent Bit forwards to. Deliberately NOT reused from opentelemetry.exporterHost (that is the traces-only endpoint). Required when the sidecar is enabled. |
+| fluentbit.output.logs.port | int | `4318` | Port of the central Alloy OTLP/HTTP logs endpoint. |
+| fluentbit.output.logs.protocol | string | `"http"` | Protocol used to reach the OTLP logs endpoint (http or https). |
 | fluentbit.resources.enabled | bool | `true` | Enable or disable resource limits and requests for the Fluent Bit sidecar |
 | fluentbit.resources.value.limits.cpu | string | `"100m"` | CPU limit for the Fluent Bit sidecar |
 | fluentbit.resources.value.limits.memory | string | `"128Mi"` | Memory limit for the Fluent Bit sidecar |

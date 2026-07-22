@@ -8,6 +8,10 @@ advertises when the feature is enabled. Its health never gates nginx.
   image: {{ include "nginx.cloudProviderDockerRegistryUrl" $ }}{{ .repository }}:{{ .tag }}
   {{- end }}
   imagePullPolicy: {{ .Values.fluentbit.image.pullPolicy }}
+  volumeMounts:
+    - name: fluentbit-config
+      mountPath: /fluent-bit/etc/fluent-bit.conf
+      subPath: fluent-bit.conf
   ports:
     - name: metrics
       containerPort: {{ .Values.fluentbit.accessLog.metrics.port }}

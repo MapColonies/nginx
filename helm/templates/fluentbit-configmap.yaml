@@ -1,0 +1,10 @@
+{{- if .Values.fluentbit.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-fluentbit-configmap" (include "nginx.fullname" .) }}
+  labels:
+    {{- include "nginx.labels" . | nindent 4 }}
+data:
+  fluent-bit.conf: {{ tpl (.Files.Get "config/fluent-bit.conf") . | quote }}
+{{- end }}
