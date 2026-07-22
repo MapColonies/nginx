@@ -231,8 +231,38 @@ fluentbit:
       # -- Extra explicit status codes to forward beyond the error classes, e.g. [429, 499]. Everything not matched by any rule is dropped.
       statusCodes: []
     metrics:
-      # -- Port on which Fluent Bit serves the merged Prometheus /metrics endpoint. When the sidecar is enabled, this becomes the pod's advertised scrape port (mclabels.prometheus.port).
+      # -- Derive Prometheus metrics from the access log and serve them on the merged /metrics endpoint. When false, no metrics blocks are rendered.
+      enabled: true
+      # -- Scrape the existing nginx-prometheus-exporter and merge its series into the endpoint, preserving the stub_status gauges.
+      scrapeExporter: true
+      # -- Port on which Fluent Bit serves the merged /metrics endpoint. When enabled, this becomes the pod's advertised scrape port (mclabels.prometheus.port).
       port: 2021
+      # -- Raw `log_to_metrics` blocks (tpl-rendered) that derive metrics from the access log. Default: a per-status-code counter and a request_time histogram. WARNING: never label by high-cardinality fields (path, query, client IP, user-agent) — it can OOM the sidecar.
+      # @default -- per-status-code counter + request_time histogram (see values.yaml)
+      config: |
+        # Per-status-code request counter (status_code is bounded, safe to label).
+        [FILTER]
+            Name               log_to_metrics
+            Match              nginx.access
+            Tag                nginx.metrics
+            Metric_Mode        counter
+            Metric_Namespace   nginx
+            Metric_Subsystem   http
+            Metric_Name        requests_total
+            Metric_Description Total nginx HTTP requests by response status code
+            Add_Label          status_code $Attributes['http.response.status_code']
+
+        # Request-time histogram in seconds. Buckets default to Prometheus's standard set.
+        [FILTER]
+            Name               log_to_metrics
+            Match              nginx.access
+            Tag                nginx.metrics
+            Metric_Mode        histogram
+            Metric_Namespace   nginx
+            Metric_Subsystem   http
+            Metric_Name        request_duration_seconds
+            Metric_Description nginx request processing time in seconds
+            Value_Field        $Attributes['mapcolonies.request_time']
 
 authorization:
   # -- Use authroization mechanism
