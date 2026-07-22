@@ -17,6 +17,11 @@ advertises when the feature is enabled. Its health never gates nginx.
       mountPath: /fluent-bit/etc/fluent-bit-parsers.conf
       subPath: fluent-bit-parsers.conf
     {{- end }}
+    {{- if .Values.fluentbit.lua.enabled }}
+    - name: fluentbit-config
+      mountPath: /fluent-bit/scripts/custom.lua
+      subPath: fluent-bit.lua
+    {{- end }}
   ports:
     - name: metrics
       containerPort: {{ .Values.fluentbit.accessLog.metrics.port }}

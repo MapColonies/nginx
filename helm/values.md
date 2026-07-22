@@ -48,6 +48,8 @@ A Helm chart for nginx
 | fluentbit.image.pullPolicy | string | `"IfNotPresent"` | Image pull policy for the Fluent Bit sidecar |
 | fluentbit.image.repository | string | `"common/fluent-bit"` | Docker image name for the Fluent Bit sidecar |
 | fluentbit.image.tag | string | `"5.0.7"` | Docker image tag for the Fluent Bit sidecar |
+| fluentbit.lua.enabled | bool | `false` | Mount a custom Lua script into the Fluent Bit sidecar for advanced filtering (e.g. latency-threshold forwarding) with no chart change. When enabled, the script is added to the Fluent Bit ConfigMap and mounted at /fluent-bit/scripts/custom.lua; reference it from a `[FILTER] Name lua` block you supply. When disabled (the default), no Lua key or volumeMount is rendered. |
+| fluentbit.lua.script | string | `""` | Inline Lua script (tpl-rendered, so it can reference `.Release.Name`, chart values, etc.) mounted at /fluent-bit/scripts/custom.lua. Only used when enabled. |
 | fluentbit.output.logs.host | string | `""` | Host of the dedicated central Alloy OTLP logs endpoint Fluent Bit forwards to. Deliberately NOT reused from opentelemetry.exporterHost (that is the traces-only endpoint). Required when the sidecar is enabled. |
 | fluentbit.output.logs.port | int | `4318` | Port of the central Alloy OTLP/HTTP logs endpoint. |
 | fluentbit.output.logs.protocol | string | `"http"` | Protocol used to reach the OTLP logs endpoint (http or https). |

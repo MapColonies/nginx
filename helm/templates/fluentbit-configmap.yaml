@@ -10,4 +10,7 @@ data:
   {{- if .Values.fluentbit.errorLog.enabled }}
   fluent-bit-parsers.conf: {{ tpl (.Files.Get "config/fluent-bit-parsers.conf") . | quote }}
   {{- end }}
+  {{- if .Values.fluentbit.lua.enabled }}
+  fluent-bit.lua: {{ tpl .Values.fluentbit.lua.script . | quote }}
+  {{- end }}
 {{- end }}
