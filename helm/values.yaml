@@ -185,6 +185,36 @@ prometheusExporter:
         # -- Memory request for the main container
         memory: 128Mi
 
+  # @section -- Fluent Bit Log-Processing Sidecar
+fluentbit:
+  # -- Enable or disable the optional Fluent Bit log-processing sidecar. When enabled, the central log-scraping label is forced off (no override) and the Prometheus scrape port is pointed at Fluent Bit's merged /metrics endpoint. When disabled (the default), the chart behaves exactly as before.
+  enabled: false
+  image:
+    # -- Docker image name for the Fluent Bit sidecar
+    repository: common/fluent-bit
+    # -- Docker image tag for the Fluent Bit sidecar
+    tag: "5.0.7"
+    # -- Image pull policy for the Fluent Bit sidecar
+    pullPolicy: IfNotPresent
+  resources:
+    # -- Enable or disable resource limits and requests for the Fluent Bit sidecar
+    enabled: true
+    value:
+      limits:
+        # -- CPU limit for the Fluent Bit sidecar
+        cpu: 100m
+        # -- Memory limit for the Fluent Bit sidecar
+        memory: 128Mi
+      requests:
+        # -- CPU request for the Fluent Bit sidecar
+        cpu: 100m
+        # -- Memory request for the Fluent Bit sidecar
+        memory: 128Mi
+  accessLog:
+    metrics:
+      # -- Port on which Fluent Bit serves the merged Prometheus /metrics endpoint. When the sidecar is enabled, this becomes the pod's advertised scrape port (mclabels.prometheus.port).
+      port: 2021
+
 authorization:
   # -- Use authroization mechanism
   enabled: true

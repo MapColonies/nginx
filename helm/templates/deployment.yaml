@@ -35,7 +35,7 @@ spec:
         {{- if .Values.additionalPodAnnotations }}
         {{- toYaml .Values.additionalPodAnnotations | nindent 8 }}
         {{- end }}
-        {{- include "mclabels.annotations" . | nindent 8 }}
+        {{- include "nginx.mclabels.annotations" . | nindent 8 }}
     spec:
     {{- if $cloudProviderImagePullSecretName }}
       imagePullSecrets:
@@ -97,8 +97,8 @@ spec:
             - name: http
               containerPort: {{ $prometheusExporterPort }}
               protocol: TCP
-          # Note: if the Prometheus Exporter container isn't live the entire Pod
-          # (including the NGINX container) will restart
+          # Note: a livenessProbe failure restarts only this container, not the whole
+          # Pod — the NGINX container keeps serving traffic while the exporter restarts.
           livenessProbe:
             initialDelaySeconds: {{ .Values.initialDelaySeconds }}
             httpGet:
@@ -109,6 +109,9 @@ spec:
             {{- toYaml .Values.prometheusExporter.resources.value | nindent 12 }}
           {{- end }}
           {{- end }}
+        {{- if .Values.fluentbit.enabled }}
+        {{- include "nginx.fluentbitContainer" . | nindent 8 }}
+        {{- end }}
         {{- if .Values.sidecars }}
         {{ tpl (.Values.sidecars) . | nindent 8 }}
         {{- end }}

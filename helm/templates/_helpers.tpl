@@ -31,6 +31,35 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+mclabels labels. When Fluent Bit is enabled, force the log-scraping label off so the
+central k8s-API collector stops ingesting the firehose. Override is set on a deep copy,
+so the shared .Values is never mutated. (`merge` can't be used here: mergo treats the
+`false` override as empty and keeps the original value.)
+*/}}
+{{- define "nginx.mclabels.labels" -}}
+{{- $mclabels := .Values.mclabels -}}
+{{- if .Values.fluentbit.enabled -}}
+{{- $mclabels = set (deepCopy .Values.mclabels) "logScraping" false -}}
+{{- end -}}
+{{- include "mclabels.labels" (dict "Values" (dict "mclabels" $mclabels "global" .Values.global)) -}}
+{{- end -}}
+
+{{/*
+mclabels annotations. When Fluent Bit is enabled, point the advertised Prometheus port at
+its merged /metrics endpoint. The override is set on a deep copy, so the exporter
+container and Service keep using the exporter's own port. Unlike the labels helper, no
+`global` is threaded through — mclabels.annotations reads only .Values.mclabels.
+*/}}
+{{- define "nginx.mclabels.annotations" -}}
+{{- $mclabels := .Values.mclabels -}}
+{{- if .Values.fluentbit.enabled -}}
+{{- $prometheus := set (deepCopy .Values.mclabels.prometheus) "port" .Values.fluentbit.accessLog.metrics.port -}}
+{{- $mclabels = set (deepCopy .Values.mclabels) "prometheus" $prometheus -}}
+{{- end -}}
+{{- include "mclabels.annotations" (dict "Values" (dict "mclabels" $mclabels)) -}}
+{{- end -}}
+
+{{/*
 Common labels
 */}}
 {{- define "nginx.labels" -}}
@@ -40,7 +69,7 @@ helm.sh/chart: {{ include "nginx.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{ include "mclabels.labels" . }}
+{{ include "nginx.mclabels.labels" . }}
 {{- end }}
 
 {{/*
