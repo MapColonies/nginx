@@ -48,6 +48,11 @@ spec:
           {{- if .Values.extraVolumes }}
             {{ tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
           {{- end }}
+        {{- if .Values.fluentbit.enabled }}
+        - name: fluentbit-config
+          configMap:
+            name: {{ printf "%s-fluentbit-configmap" (include "nginx.fullname" .) }}
+        {{- end }}
       containers:
         - name: nginx
           {{- with .Values.image }}

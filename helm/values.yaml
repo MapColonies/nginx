@@ -210,7 +210,26 @@ fluentbit:
         cpu: 100m
         # -- Memory request for the Fluent Bit sidecar
         memory: 128Mi
+  output:
+    logs:
+      # -- Host of the dedicated central Alloy OTLP logs endpoint Fluent Bit forwards to. Deliberately NOT reused from opentelemetry.exporterHost (that is the traces-only endpoint). Required when the sidecar is enabled.
+      host: ""
+      # -- Port of the central Alloy OTLP/HTTP logs endpoint.
+      port: 4318
+      # -- Protocol used to reach the OTLP logs endpoint (http or https).
+      protocol: http
   accessLog:
+    # -- UDP port on loopback where Fluent Bit's syslog input listens and to which nginx forwards its JSON-formatted access log.
+    syslogPort: 5514
+    # -- When true, nginx writes a human-readable (combined-style) access log to stdout for kubectl logs; the JSON log always goes to Fluent Bit over syslog. When false, stdout also receives the JSON format.
+    stdoutReadable: true
+    forward:
+      # -- Forward server errors (5xx) to central Alloy. On by default so incident-relevant logs reach Loki with no configuration.
+      serverErrors: true
+      # -- Forward client errors (4xx) to central Alloy.
+      clientErrors: false
+      # -- Extra explicit status codes to forward beyond the error classes, e.g. [429, 499]. Everything not matched by any rule is dropped.
+      statusCodes: []
     metrics:
       # -- Port on which Fluent Bit serves the merged Prometheus /metrics endpoint. When the sidecar is enabled, this becomes the pod's advertised scrape port (mclabels.prometheus.port).
       port: 2021
