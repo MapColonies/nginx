@@ -263,6 +263,13 @@ fluentbit:
             Metric_Name        request_duration_seconds
             Metric_Description nginx request processing time in seconds
             Value_Field        $Attributes['mapcolonies.request_time']
+  errorLog:
+    # -- Ship nginx error logs through a separate Fluent Bit pipeline (syslog input, plaintext parser, severity filter, OTLP output). Independent of the access-log pipeline. Only takes effect when fluentbit.enabled is also true.
+    enabled: true
+    # -- UDP port on loopback where Fluent Bit's error-log syslog input listens and to which nginx forwards its error log. Distinct from accessLog.syslogPort.
+    syslogPort: 5515
+    # -- Forward error-log records at or above this severity, applied natively by nginx's error_log directive (records below never leave nginx). Ordering: debug < info < notice < warn < error < crit < alert < emerg. The OSS image cannot emit `debug` (needs a debug-enabled build).
+    minLevel: warn
 
 authorization:
   # -- Use authroization mechanism

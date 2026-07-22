@@ -12,6 +12,11 @@ advertises when the feature is enabled. Its health never gates nginx.
     - name: fluentbit-config
       mountPath: /fluent-bit/etc/fluent-bit.conf
       subPath: fluent-bit.conf
+    {{- if .Values.fluentbit.errorLog.enabled }}
+    - name: fluentbit-config
+      mountPath: /fluent-bit/etc/fluent-bit-parsers.conf
+      subPath: fluent-bit-parsers.conf
+    {{- end }}
   ports:
     - name: metrics
       containerPort: {{ .Values.fluentbit.accessLog.metrics.port }}
