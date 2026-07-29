@@ -57,7 +57,7 @@ caKey: "ca.crt"
 
 image:
   # -- Docker image name
-  repository: nginx
+  repository: common/nginx
   # -- Docker image tag. If no value is specified, appVersion will be taken.
   tag: ''
 # -- Port on which the application will listen
@@ -223,6 +223,13 @@ fluentbit:
     syslogPort: 5514
     # -- When true, nginx writes a human-readable (combined-style) access log to stdout for kubectl logs; the JSON log always goes to Fluent Bit over syslog. When false, stdout also receives the JSON format.
     stdoutReadable: true
+    exclude:
+      # -- Drop matching access-log records before metrics are derived and before forwarding, so probe/health-check traffic neither skews the metrics nor reaches Loki. Note the kubelet liveness path (`/nginx_status`) is already excluded by `access_log off` in the image's status_site.conf; this is for probes that hit the main server (router/LB health checks, custom health endpoints).
+      enabled: false
+      # -- Fluent Bit record accessor the exclude regex is matched against. Must be a field of the decoded JSON access log.
+      key: $Attributes['url.path']
+      # -- Regex matched against `key`; records that match are dropped. Covers the common liveness/readiness path spellings. Only used when enabled.
+      regex: ^/(health|healthz|live|livez|liveness|ready|readyz|readiness|nginx_status)$
     forward:
       # -- Forward server errors (5xx) to central Alloy. On by default so incident-relevant logs reach Loki with no configuration.
       serverErrors: true
@@ -240,7 +247,10 @@ fluentbit:
       # -- Raw `log_to_metrics` blocks (tpl-rendered) that derive metrics from the access log. Default: a per-status-code counter and a request_time histogram. WARNING: never label by high-cardinality fields (path, query, client IP, user-agent) — it can OOM the sidecar.
       # @default -- per-status-code counter + request_time histogram (see values.yaml)
       config: |
-        # Per-status-code request counter (status_code is bounded, safe to label).
+        # Per-status-code response counter (status_code is bounded, safe to label). Named
+        # responses_total, not requests_total: the scraped exporter already publishes an
+        # unlabelled nginx_http_requests_total, and two same-named families on one endpoint
+        # make Prometheus reject the whole scrape.
         [FILTER]
             Name               log_to_metrics
             Match              nginx.access
@@ -248,8 +258,8 @@ fluentbit:
             Metric_Mode        counter
             Metric_Namespace   nginx
             Metric_Subsystem   http
-            Metric_Name        requests_total
-            Metric_Description Total nginx HTTP requests by response status code
+            Metric_Name        responses_total
+            Metric_Description Total nginx HTTP responses by status code
             Add_Label          status_code $Attributes['http.response.status_code']
 
         # Request-time histogram in seconds. Buckets default to Prometheus's standard set.
@@ -275,6 +285,16 @@ fluentbit:
     enabled: false
     # -- Inline Lua script (tpl-rendered, so it can reference `.Release.Name`, chart values, etc.) mounted at /fluent-bit/scripts/custom.lua. Only used when enabled.
     script: ""
+  debug:
+    # -- Print the log stream to the sidecar's own stdout (`kubectl logs <pod> -c fluent-bit`) for troubleshooting. Always prints the records handed to the OTLP output; `stages` add earlier snapshots taken by `stdout` filters at those points in the pipeline. Off by default: it prints every record the sidecar handles, which is the volume this feature exists to avoid shipping.
+    enabled: false
+    # -- Fluent Bit's service log level while debug is enabled. `debug` reports plugin-level decisions, `trace` is extremely verbose. When debug is disabled the level is always `info`.
+    logLevel: debug
+    stages:
+      # -- Dump records as they arrive from nginx, before the body is decoded. Answers "is nginx delivering anything, and is the syslog envelope what Fluent Bit expects" — the only stage that shows lines the parser later rejects.
+      received: false
+      # -- Dump records once the body is decoded (JSON for access logs, the nginx_error parser for error logs) and before the metrics and forwarding filters. Shows the fields the rest of the pipeline actually sees; a record still holding a raw `message` means the decode failed. Comparing this against the always-printed output dump is what shows which filter dropped a record.
+      parsed: true
 
 authorization:
   # -- Use authroization mechanism

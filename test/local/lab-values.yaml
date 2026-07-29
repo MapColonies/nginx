@@ -1,0 +1,39 @@
+# Values for the local harness. Only what matters for rendering the nginx and Fluent Bit
+# configs; cluster-only concerns (route, pull secrets) are irrelevant here.
+
+cloudProvider:
+  dockerRegistryUrl: ""
+  imagePullSecretName: ""
+  flavor: minikube
+
+authorization:
+  enabled: false
+
+# No upstream by default, so nginx answers from its own docroot.
+backend:
+  enabled: false
+
+opentelemetry:
+  exporterHost: "127.0.0.1"
+  samplerMethod: "AlwaysOff"
+
+route:
+  enabled: false
+
+fluentbit:
+  enabled: true
+  output:
+    logs:
+      host: "otlp-sink"
+      port: 4318
+      protocol: http
+  accessLog:
+    forward:
+      serverErrors: true
+      # On so the harness exercises 4xx forwarding; the chart default is false.
+      clientErrors: true
+    metrics:
+      enabled: true
+      scrapeExporter: true
+  errorLog:
+    enabled: true

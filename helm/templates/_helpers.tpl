@@ -184,6 +184,15 @@ dropped and nothing is forwarded.
 {{- end -}}
 
 {{/*
+The central Alloy OTLP logs host. Required whenever the sidecar is enabled — an empty
+value renders a Fluent Bit config that crash-loops on startup, so fail the release
+instead with a message that names the value to set.
+*/}}
+{{- define "nginx.fluentbit.logsHost" -}}
+{{- required "fluentbit.output.logs.host is required when fluentbit.enabled is true — set it to the central Alloy OTLP logs endpoint" .Values.fluentbit.output.logs.host -}}
+{{- end -}}
+
+{{/*
 Generate OpenTelemetry trace configuration
 */}}
 {{- define "nginx.otelTrace" -}}

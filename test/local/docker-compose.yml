@@ -1,0 +1,44 @@
+# Reproduces the sidecar pod outside Kubernetes.
+#
+# fluent-bit joins nginx's network namespace, so `Listen 127.0.0.1` and
+# `access_log syslog:server=127.0.0.1` behave exactly as they do in a pod. nginx owns the
+# namespace and therefore publishes the ports for both containers.
+#
+# Configs come from ./rendered/, produced by ./render.py -- see README.md.
+
+services:
+  nginx:
+    build: ../../docker-image
+    ports:
+      - "8080:8080" # site
+      - "8081:8081" # nginx_status
+      - "2021:2021" # fluent-bit's merged /metrics, served inside this namespace
+    volumes:
+      - ./rendered/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./rendered/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./rendered/log_format.conf:/etc/nginx/log_format.conf:ro
+
+  # Keep this tag in step with fluentbit.image.tag in helm/values.yaml.
+  fluent-bit:
+    image: fluent/fluent-bit:${FLUENT_BIT_TAG:-5.0.7}
+    network_mode: "service:nginx"
+    depends_on:
+      - nginx
+    volumes:
+      - ./rendered/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./rendered/fluent-bit-parsers.conf:/fluent-bit/etc/fluent-bit-parsers.conf:ro
+
+  # Present so fluentbit.accessLog.metrics.scrapeExporter (on by default) has something real
+  # to scrape, and the merged /metrics can be checked for the stub_status gauges.
+  nginx-prometheus-exporter:
+    image: nginx/nginx-prometheus-exporter:${EXPORTER_TAG:-1.5.1}
+    command: ["-nginx.scrape-uri=http://localhost:8081/nginx_status"]
+    network_mode: "service:nginx"
+    depends_on:
+      - nginx
+
+  # Stands in for central Alloy: accepts OTLP/HTTP logs and prints what it receives.
+  otlp-sink:
+    image: fluent/fluent-bit:${FLUENT_BIT_TAG:-5.0.7}
+    volumes:
+      - ./otlp-sink.conf:/fluent-bit/etc/fluent-bit.conf:ro
