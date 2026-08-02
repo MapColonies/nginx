@@ -1,0 +1,24 @@
+# The harness's stand-in for central Alloy, and its window onto the wire.
+#
+# `debug` prints each OTLP log record fully decoded -- resource attributes, log attributes,
+# severity, body -- which is what tells a correctly shaped record from one whose whole envelope
+# was stuffed into the body. `otlphttp` then passes everything to lgtm, so the records stay
+# queryable out of Loki (./loki.py).
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  debug:
+    verbosity: detailed
+  otlphttp:
+    endpoint: http://lgtm:4318
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      exporters: [debug, otlphttp]

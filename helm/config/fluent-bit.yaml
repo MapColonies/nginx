@@ -1,0 +1,182 @@
+# Fluent Bit configuration, rendered through Helm `tpl` from the chart ConfigMap
+# (mirroring how nginx.conf / log_format.conf are shipped).
+#
+# YAML, not classic `.conf`: only YAML config supports `processors`, which is the only way to
+# reach the OTLP resource/scope of an outgoing record (`content_modifier` with
+# `context: otel_resource_attributes`). Classic config can set log attributes but never
+# resource attributes, so every forwarded record arrives at Loki as `unknown_service`.
+#
+# Access-log forwarding pipeline: nginx ships its JSON access log here over syslog UDP on
+# loopback (best-effort); Fluent Bit filters it down to the selected status codes and
+# forwards only those to central Alloy over OTLP. Everything else is dropped at the source.
+#
+# Metrics pipeline (fluentbit.accessLog.metrics): derive Prometheus metrics from the same
+# stream, merge with the scraped nginx exporter, and serve one /metrics endpoint.
+{{- $debug := .Values.fluentbit.debug }}
+{{- $stages := ternary $debug.stages (dict) $debug.enabled }}
+service:
+  flush: 1
+  daemon: off
+  log_level: {{ $debug.enabled | ternary $debug.logLevel "info" }}
+  # Relative to this file, i.e. the image's own /fluent-bit/etc/parsers.conf (json, syslog, …).
+  parsers_file: parsers.conf
+{{- if .Values.fluentbit.errorLog.enabled }}
+
+# Parses the standard open-source nginx error-log line into structured fields. Format:
+#   2024/01/15 10:23:45 [error] 1234#5678: *90 <message>, client: …, server: …, request: "…"
+# The leading timestamp is optional (some syslog paths strip it), the connection id (*cid) is
+# optional (worker/startup messages omit it), and the client/server/request tail is optional
+# and matched as a unit so a comma inside <message> does not truncate it.
+parsers:
+  - name: nginx_error
+    format: regex
+    regex: '^(?:(?<time>\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) )?\[(?<level>\w+)\] (?<pid>\d+)#\d+:(?: \*\d+)? (?<message>.*?)(?:, client: (?<client>[^,]+), server: (?<server>[^,]*), request: "(?<request>[^"]*)".*)?$'
+    time_key: time
+    time_format: '%Y/%m/%d %H:%M:%S'
+    time_keep: off
+{{- end }}
+
+pipeline:
+  inputs:
+    # nginx `access_log syslog:server=127.0.0.1:<port>` delivers the JSON `main` format here.
+    # Parser is mandatory: nginx frames its datagrams as RFC3164 (`<PRI>Mmm dd hh:mm:ss host
+    # tag: msg`), while Fluent Bit's syslog input defaults to syslog-rfc5424 — that mismatch
+    # fails to parse and silently drops every record before any filter runs.
+    - name: syslog
+      tag: nginx.access
+      mode: udp
+      listen: 127.0.0.1
+      port: {{ .Values.fluentbit.accessLog.syslogPort }}
+      parser: syslog-rfc3164
+      buffer_chunk_size: 32k
+      buffer_max_size: 64k
+{{- if .Values.fluentbit.errorLog.enabled }}
+    # Error-log pipeline: distinct port and tag (nginx.error) from the access pipeline.
+    # Same RFC3164 framing as the access log, so the same explicit parser is required.
+    - name: syslog
+      tag: nginx.error
+      mode: udp
+      listen: 127.0.0.1
+      port: {{ .Values.fluentbit.errorLog.syslogPort }}
+      parser: syslog-rfc3164
+      buffer_chunk_size: 32k
+      buffer_max_size: 64k
+{{- end }}
+{{- if .Values.fluentbit.accessLog.metrics.enabled }}
+    # Fluent Bit's own metrics (records/bytes in and out, retries, uptime) — a rough signal for
+    # sizing the sidecar (compare input records against nginx's request count).
+    # - name: fluentbit_metrics
+    #   tag: nginx.metrics.fluentbit
+    #   scrape_interval: 30
+{{- if .Values.fluentbit.accessLog.metrics.scrapeExporter }}
+    # Scrape the existing nginx-prometheus-exporter so its stub_status gauges merge into the
+    # single /metrics endpoint below (port = the exporter's own mclabels.prometheus.port).
+    - name: prometheus_scrape
+      tag: nginx.metrics.exporter
+      host: 127.0.0.1
+      port: {{ .Values.mclabels.prometheus.port }}
+      metrics_path: /metrics
+{{- end }}
+{{- end }}
+
+  filters:
+{{- if $stages.received }}
+    # Debug stage `received`: both pipelines straight off the syslog input, before any decoding.
+    # `stdout` is a filter, so it prints the records as they are at this point and passes them on.
+    - name: stdout
+      match_regex: ^nginx\.(access|error)$
+{{- end }}
+    # The syslog message body is the nginx JSON line; decode it so the OTel-shaped fields
+    # (including the nested http.response.status_code) become queryable by the grep filter.
+    - name: parser
+      match: nginx.access
+      key_name: message
+      parser: json
+      reserve_data: off
+{{- if $stages.parsed }}
+    # Debug stage `parsed`: access records after JSON decode. Deliberately ahead of the guard
+    # below, so lines the decode failed on are still visible here (they keep a raw `message`).
+    - name: stdout
+      match: nginx.access
+{{- end }}
+    # Drop records the JSON parser could not decode. log_to_metrics segfaults on a record whose
+    # value_field is missing, so an unparseable line would otherwise crash-loop the sidecar.
+    - name: grep
+      match: nginx.access
+      regex: "$Attributes['http.response.status_code'] ."
+{{- if .Values.fluentbit.accessLog.exclude.enabled }}
+    # Drop health-check / probe traffic before anything downstream sees it, so it neither
+    # inflates the derived metrics nor reaches Loki. Placed after the JSON parser (the matched
+    # field only exists once decoded) and before log_to_metrics.
+    - name: grep
+      match: nginx.access
+      exclude: {{ printf "%s %s" .Values.fluentbit.accessLog.exclude.key .Values.fluentbit.accessLog.exclude.regex | quote }}
+{{- end }}
+{{- if .Values.fluentbit.accessLog.metrics.enabled }}
+    # Derive metrics from the full stream, before grep drops the non-forwarded records, so the
+    # counters cover every request. Overridable fluentbit.accessLog.metrics.config (tpl).
+{{- tpl (toYaml .Values.fluentbit.accessLog.metrics.config) . | nindent 4 }}
+{{- end }}
+    # Keep only the status codes selected by fluentbit.accessLog.forward; drop everything else.
+    # When no forwarding rule is active the regex matches nothing, so all records are dropped.
+    - name: grep
+      match: nginx.access
+      regex: {{ printf "$Attributes['http.response.status_code'] %s" (include "nginx.fluentbit.accessLogRegex" .) | quote }}
+{{- if .Values.fluentbit.errorLog.enabled }}
+    # Parse the plaintext nginx error line into structured fields, using the nginx_error parser
+    # defined above. Severity is already filtered at nginx, so no grep.
+    - name: parser
+      match: nginx.error
+      key_name: message
+      parser: nginx_error
+      reserve_data: off
+{{- if $stages.parsed }}
+    # Debug stage `parsed`, error pipeline.
+    - name: stdout
+      match: nginx.error
+{{- end }}
+{{- end }}
+
+  outputs:
+    # Forward the surviving records to the dedicated central Alloy OTLP/HTTP logs endpoint
+    # (fluentbit.output.logs.*, deliberately NOT the traces-only opentelemetry.exporterHost).
+    - name: opentelemetry
+      match: nginx.access
+      host: {{ include "nginx.fluentbit.logsHost" . | quote }}
+      port: {{ .Values.fluentbit.output.logs.port }}
+      logs_uri: /v1/logs
+      {{- if eq .Values.fluentbit.output.logs.protocol "https" }}
+      tls: on
+      {{- end }}
+{{- if .Values.fluentbit.errorLog.enabled }}
+    # Error-log records to the same OTLP logs endpoint as the access logs (tag-isolated).
+    # Unlike the access log, these records are not already OTel-shaped: without an explicit
+    # body/attribute mapping the output keeps only the message and discards the parsed
+    # level/pid/client/request fields.
+    - name: opentelemetry
+      match: nginx.error
+      host: {{ include "nginx.fluentbit.logsHost" . | quote }}
+      port: {{ .Values.fluentbit.output.logs.port }}
+      logs_uri: /v1/logs
+      logs_body_key: $message
+      logs_body_key_attributes: on
+      logs_severity_text_message_key: $level
+      {{- if eq .Values.fluentbit.output.logs.protocol "https" }}
+      tls: on
+      {{- end }}
+{{- end }}
+{{- if $debug.enabled }}
+    # Debug: the records handed to the OTLP outputs above, i.e. what actually reaches Alloy once
+    # every filter has run. Always printed while debug is on — out_stdout flushes the process's
+    # stdout buffer, which is what makes the `stdout` filter dumps above appear promptly too.
+    - name: stdout
+      match_regex: ^nginx\.(access|error)$
+{{- end }}
+{{- if .Values.fluentbit.accessLog.metrics.enabled }}
+    # Serve the merged /metrics (log-derived + scraped exporter + Fluent Bit's own) on
+    # metrics.port. `match: '*'` is safe — prometheus_exporter only handles metric events.
+    - name: prometheus_exporter
+      match: '*'
+      host: 0.0.0.0
+      port: {{ .Values.fluentbit.accessLog.metrics.port }}
+{{- end }}

@@ -1,8 +1,12 @@
-# Reproduces the sidecar pod outside Kubernetes.
+# Reproduces the sidecar pod outside Kubernetes, shipping into a real OTel backend.
 #
 # fluent-bit joins nginx's network namespace, so `Listen 127.0.0.1` and
 # `access_log syslog:server=127.0.0.1` behave exactly as they do in a pod. nginx owns the
 # namespace and therefore publishes the ports for both containers.
+#
+# The forwarding path mirrors production -- sidecar -> OTLP/HTTP -> collector -> Loki:
+# otel-collector stands in for central Alloy and prints every record it receives fully
+# decoded, then passes it to lgtm, where it can be queried like any other log.
 #
 # Configs come from ./rendered/, produced by ./render.py -- see README.md.
 
@@ -24,9 +28,11 @@ services:
     network_mode: "service:nginx"
     depends_on:
       - nginx
+    # Same override the chart applies: the image's default command loads the classic
+    # fluent-bit.conf, and the sidecar's config is YAML.
+    command: ["-c", "/fluent-bit/etc/fluent-bit.yaml"]
     volumes:
-      - ./rendered/fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf:ro
-      - ./rendered/fluent-bit-parsers.conf:/fluent-bit/etc/fluent-bit-parsers.conf:ro
+      - ./rendered/fluent-bit.yaml:/fluent-bit/etc/fluent-bit.yaml:ro
 
   # Present so fluentbit.accessLog.metrics.scrapeExporter (on by default) has something real
   # to scrape, and the merged /metrics can be checked for the stub_status gauges.
@@ -37,8 +43,19 @@ services:
     depends_on:
       - nginx
 
-  # Stands in for central Alloy: accepts OTLP/HTTP logs and prints what it receives.
-  otlp-sink:
-    image: fluent/fluent-bit:${FLUENT_BIT_TAG:-5.0.7}
+  # Stands in for central Alloy. Its debug exporter is the only view of what the sidecar
+  # actually put on the wire -- resource attributes, log attributes, severity, body.
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:${OTELCOL_TAG:-latest}
+    command: ["--config=/etc/otelcol/config.yaml"]
     volumes:
-      - ./otlp-sink.conf:/fluent-bit/etc/fluent-bit.conf:ro
+      - ./otel-collector.yaml:/etc/otelcol/config.yaml:ro
+    depends_on:
+      - lgtm
+
+  # OTel Collector -> Loki/Prometheus/Tempo + Grafana. Large image (~1.5 GB), pulled once.
+  lgtm:
+    image: grafana/otel-lgtm:${LGTM_TAG:-latest}
+    ports:
+      - "3000:3000" # Grafana
+      - "3100:3100" # Loki HTTP API, what ./loki.py queries

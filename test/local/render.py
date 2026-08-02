@@ -2,7 +2,7 @@
 """Render the chart with lab-values.yaml and write every ConfigMap key into ./rendered/.
 
 The harness always tests exactly what the chart produces, so there are no hand-maintained
-copies of nginx.conf / fluent-bit.conf to drift. Any extra arguments are passed straight
+copies of nginx.conf / fluent-bit.yaml to drift. Any extra arguments are passed straight
 through to `helm template`, e.g.
 
     ./render.py --set fluentbit.accessLog.exclude.enabled=true
@@ -15,9 +15,9 @@ HERE = pathlib.Path(__file__).parent
 CHART = HERE.parent.parent / "helm"
 OUT = HERE / "rendered"
 
-# docker-compose.yml mounts these unconditionally, so they must exist even when the values
-# in use don't make the chart render them.
-ALWAYS_PRESENT = ("fluent-bit.conf", "fluent-bit-parsers.conf")
+# docker-compose.yml mounts this unconditionally, so it must exist even when the values
+# in use don't make the chart render it.
+ALWAYS_PRESENT = ("fluent-bit.yaml",)
 
 cmd = ["helm", "template", "lab", str(CHART), "-f", str(HERE / "lab-values.yaml")] + sys.argv[1:]
 proc = subprocess.run(cmd, capture_output=True, text=True)

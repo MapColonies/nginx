@@ -24,7 +24,8 @@ fluentbit:
   enabled: true
   output:
     logs:
-      host: "otlp-sink"
+      # The harness's stand-in for central Alloy (docker-compose.yml).
+      host: "otel-collector"
       port: 4318
       protocol: http
   accessLog:

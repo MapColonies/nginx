@@ -6,10 +6,7 @@ metadata:
   labels:
     {{- include "nginx.labels" . | nindent 4 }}
 data:
-  fluent-bit.conf: {{ tpl (.Files.Get "config/fluent-bit.conf") . | quote }}
-  {{- if .Values.fluentbit.errorLog.enabled }}
-  fluent-bit-parsers.conf: {{ tpl (.Files.Get "config/fluent-bit-parsers.conf") . | quote }}
-  {{- end }}
+  fluent-bit.yaml: {{ tpl (.Files.Get "config/fluent-bit.yaml") . | quote }}
   {{- if .Values.fluentbit.lua.enabled }}
   fluent-bit.lua: {{ tpl .Values.fluentbit.lua.script . | quote }}
   {{- end }}
