@@ -100,13 +100,19 @@ async function opaAuth(r) {
 
     const opaResult = JSON.parse(response.responseText).result;
     if (!opaResult.allowed) {
-      r.error(opaResult.reason);
-      const returnCode = opaResult.reason.includes("no token supplied")
-        ? 401
-        : 403;
+      let reason;
+      if (opaResult.reason) {
+        reason = opaResult.reason;
+      } else if (opaResult.reasons) {
+        reason = opaResult.reasons.join(", ");
+      } else {
+        reason = "Access denied - no reason provided";
+      }
+      r.error(reason);
+      const returnCode = reason.includes("no token supplied") ? 401 : 403;
 
       r.variables.opa_result = "false";
-      r.variables.opa_reason = opaResult.reason;
+      r.variables.opa_reason = reason;
       return r.return(returnCode);
     }
     r.variables.opa_result = "true";
