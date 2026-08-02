@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.3.1](https://github.com/MapColonies/nginx/compare/v2.3.0...v2.3.1) (2026-08-02)
+
+
+### Bug Fixes
+
+* changed parsing so it works with all versions of opa policy ([#57](https://github.com/MapColonies/nginx/issues/57)) ([f524b0f](https://github.com/MapColonies/nginx/commit/f524b0f305c3bae08a4932b2e0d9daf52434b33b))
+
 ## [2.3.0](https://github.com/MapColonies/nginx/compare/v2.2.2...v2.3.0) (2026-07-21)
 
 
