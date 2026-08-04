@@ -34,8 +34,8 @@ A Helm chart for nginx
 | extraVolumes | list | `[]` | List of extra volumes that are added to the Deployment |
 | fluentbit.accessLog.exclude.enabled | bool | `false` | Drop matching access-log records before metrics are derived and before forwarding, so probe/health-check traffic neither skews the metrics nor reaches Loki. Note the kubelet liveness path (`/nginx_status`) is already excluded by `access_log off` in the image's status_site.conf; this is for probes that hit the main server (router/LB health checks, custom health endpoints). |
 | fluentbit.accessLog.exclude.key | string | `"$Attributes['url.path']"` | Fluent Bit record accessor the exclude regex is matched against. Must be a field of the decoded JSON access log. |
-| fluentbit.accessLog.exclude.regex | string | `"^/(health\|healthz\|live\|livez\|liveness\|ready\|readyz\|readiness\|nginx_status)$"` | Regex matched against `key`; records that match are dropped. Covers the common liveness/readiness path spellings. Only used when enabled. |
-| fluentbit.accessLog.forward.clientErrors | bool | `false` | Forward client errors (4xx) to central Alloy. |
+| fluentbit.accessLog.exclude.regex | string | `"^/(health|healthz|live|livez|liveness|ready|readyz|readiness|nginx_status)$"` | Regex matched against `key`; records that match are dropped. Covers the common liveness/readiness path spellings. Only used when enabled. |
+| fluentbit.accessLog.forward.clientErrors | bool | `true` | Forward client errors (4xx) to central Alloy. |
 | fluentbit.accessLog.forward.serverErrors | bool | `true` | Forward server errors (5xx) to central Alloy. On by default so incident-relevant logs reach Loki with no configuration. |
 | fluentbit.accessLog.forward.statusCodes | list | `[]` | Extra explicit status codes to forward beyond the error classes, e.g. [429, 499]. Everything not matched by any rule is dropped. |
 | fluentbit.accessLog.metrics.config | list | per-status-code counter + request_time histogram (see values.yaml) | Fluent Bit filter entries (a YAML list, tpl-rendered) that derive metrics from the access log; spliced into the sidecar's `pipeline.filters`. Default: a per-status-code counter and a request_time histogram. Replacing this replaces both. WARNING: never label by high-cardinality fields (path, query, client IP, user-agent) — it can OOM the sidecar. |
@@ -45,7 +45,7 @@ A Helm chart for nginx
 | fluentbit.accessLog.stdoutReadable | bool | `true` | When true, nginx writes a human-readable (combined-style) access log to stdout for kubectl logs; the JSON log always goes to Fluent Bit over syslog. When false, stdout also receives the JSON format. |
 | fluentbit.accessLog.syslogPort | int | `5514` | UDP port on loopback where Fluent Bit's syslog input listens and to which nginx forwards its JSON-formatted access log. |
 | fluentbit.debug.enabled | bool | `false` | Print the log stream to the sidecar's own stdout (`kubectl logs <pod> -c fluent-bit`) for troubleshooting. Always prints the records handed to the OTLP output; `stages` add earlier snapshots taken by `stdout` filters at those points in the pipeline. Off by default: it prints every record the sidecar handles, which is the volume this feature exists to avoid shipping. |
-| fluentbit.debug.logLevel | string | `"debug"` | Fluent Bit's service log level while debug is enabled. `debug` reports plugin-level decisions, `trace` is extremely verbose. When debug is disabled the level is always `info`. |
+| fluentbit.debug.logLevel | string | `"info"` | Fluent Bit's service log level while debug is enabled. `debug` reports plugin-level decisions, `trace` is extremely verbose. When debug is disabled the level is always `info`. |
 | fluentbit.debug.stages.parsed | bool | `true` | Dump records once the body is decoded (JSON for access logs, the nginx_error parser for error logs) and before the metrics and forwarding filters. Shows the fields the rest of the pipeline actually sees; a record still holding a raw `message` means the decode failed. Comparing this against the always-printed output dump is what shows which filter dropped a record. |
 | fluentbit.debug.stages.received | bool | `false` | Dump records as they arrive from nginx, before the body is decoded. Answers "is nginx delivering anything, and is the syslog envelope what Fluent Bit expects" — the only stage that shows lines the parser later rejects. |
 | fluentbit.enabled | bool | `false` | Enable or disable the optional Fluent Bit log-processing sidecar. When enabled, the central log-scraping label is forced off (no override) and the Prometheus scrape port is pointed at Fluent Bit's merged /metrics endpoint. When disabled (the default), the chart behaves exactly as before. |
@@ -71,7 +71,7 @@ A Helm chart for nginx
 | global.ingress.domain | string | `""` | Domain name for the ingress. |
 | global.metrics | object | `{}` | Configuration for metrics collection. |
 | global.tracing | object | `{}` | Configuration for distributed tracing. |
-| image.repository | string | `"nginx"` | Docker image name |
+| image.repository | string | `"common/nginx"` | Docker image name |
 | image.tag | string | `""` | Docker image tag. If no value is specified, appVersion will be taken. |
 | imagePullPolicy | string | `"Always"` | Image pull policy for all containers in the deployment |
 | ingress.additionalAnnotations | string | `nil` | Additional annotations for ingress |
