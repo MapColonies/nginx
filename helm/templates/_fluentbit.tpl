@@ -1,6 +1,7 @@
 {{/*
-Fluent Bit sidecar container. Serves the merged Prometheus /metrics endpoint the pod
-advertises when the feature is enabled. Its health never gates nginx.
+Fluent Bit sidecar container. The merged /metrics port is declared only when
+accessLog.metrics.enabled — the prometheus_exporter output is gated on the same value, so
+declaring it unconditionally would advertise a port with nothing serving it.
 */}}
 {{- define "nginx.fluentbitContainer" -}}
 - name: fluent-bit
@@ -31,10 +32,12 @@ advertises when the feature is enabled. Its health never gates nginx.
       valueFrom:
         fieldRef:
           fieldPath: metadata.uid
+  {{- if .Values.fluentbit.accessLog.metrics.enabled }}
   ports:
     - name: metrics
       containerPort: {{ .Values.fluentbit.accessLog.metrics.port }}
       protocol: TCP
+  {{- end }}
   {{- if .Values.fluentbit.resources.enabled }}
   resources:
     {{- toYaml .Values.fluentbit.resources.value | nindent 4 }}

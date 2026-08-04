@@ -45,14 +45,15 @@ so the shared .Values is never mutated. (`merge` can't be used here: mergo treat
 {{- end -}}
 
 {{/*
-mclabels annotations. When Fluent Bit is enabled, point the advertised Prometheus port at
-its merged /metrics endpoint. The override is set on a deep copy, so the exporter
-container and Service keep using the exporter's own port. Unlike the labels helper, no
-`global` is threaded through — mclabels.annotations reads only .Values.mclabels.
+mclabels annotations. When Fluent Bit serves metrics, point the advertised Prometheus port at
+its merged /metrics endpoint. Gated on accessLog.metrics.enabled too: with metrics off nothing
+listens on that port, and the exporter's own port must stay advertised. The override is set on a
+deep copy, so the exporter container and Service keep using the exporter's own port. Unlike the
+labels helper, no `global` is threaded through — mclabels.annotations reads only .Values.mclabels.
 */}}
 {{- define "nginx.mclabels.annotations" -}}
 {{- $mclabels := .Values.mclabels -}}
-{{- if .Values.fluentbit.enabled -}}
+{{- if and .Values.fluentbit.enabled .Values.fluentbit.accessLog.metrics.enabled -}}
 {{- $prometheus := set (deepCopy .Values.mclabels.prometheus) "port" .Values.fluentbit.accessLog.metrics.port -}}
 {{- $mclabels = set (deepCopy .Values.mclabels) "prometheus" $prometheus -}}
 {{- end -}}

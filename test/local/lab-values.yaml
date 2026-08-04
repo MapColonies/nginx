@@ -33,7 +33,8 @@ fluentbit:
   accessLog:
     forward:
       serverErrors: true
-      # On so the harness exercises 4xx forwarding; the chart default is false.
+      # Both stated explicitly (they match the chart defaults) so the harness's forwarding
+      # selection is readable without cross-checking values.yaml.
       clientErrors: true
     metrics:
       enabled: true

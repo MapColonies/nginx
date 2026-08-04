@@ -2,8 +2,8 @@
 #
 # `debug` prints each OTLP log record fully decoded -- resource attributes, log attributes,
 # severity, body -- which is what tells a correctly shaped record from one whose whole envelope
-# was stuffed into the body. `otlphttp` then passes everything to lgtm, so the records stay
-# queryable out of Loki (./loki.py).
+# was stuffed into the body. `file` keeps the same records as OTLP JSON in logs/out.json.
+# To browse them in Grafana instead, point the sidecar at lgtm directly -- see README.md.
 
 receivers:
   otlp:
@@ -16,8 +16,6 @@ exporters:
     verbosity: detailed
   file:
     path: /tmp/logs/out.json
-  otlphttp:
-    endpoint: http://lgtm:4318
 
 service:
   pipelines:

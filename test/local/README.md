@@ -82,7 +82,7 @@ docker compose restart fluent-bit   # nginx.conf / log_format.conf changes: rest
 
 Any arguments to `render.py` are passed through to `helm template`. Persistent overrides go in
 `lab-values.yaml`, which already disables authorization and the route, points the sidecar at
-`otel-collector`, turns on 4xx forwarding (the chart default is off) and enables
+`otel-collector`, states the 4xx/5xx forwarding selection explicitly and enables
 `fluentbit.debug`, whose `stdout` filters are what make `docker compose logs fluent-bit` show
 each record at its position in the filter chain — a record appearing at `parsed` but not in the
 output dump was removed by a filter in between.
@@ -112,7 +112,7 @@ Tear down with `docker compose down`.
   that Prometheus would accept it — two families sharing a name make it reject the whole scrape:
   `curl -s http://localhost:2021/metrics | docker run --rm -i --entrypoint promtool
   prom/prometheus:v3.1.0 check metrics`. Ignore `should have "_total" suffix` lint on
-  `fluentbit_*` and `nginx_connections_*` (upstream names, not ours); a `parsing error` is real.
+  `nginx_connections_*` (an upstream name, not ours); a `parsing error` is real.
 - `POD_UID` stands in for the downward API and defaults to all zeroes; set it per-run to see a
   real `k8s.pod.uid` resource attribute.
 - The `fluent/fluent-bit` tag in `docker-compose.yml` should track `fluentbit.image.tag` in

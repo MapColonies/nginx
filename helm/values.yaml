@@ -187,7 +187,7 @@ prometheusExporter:
 
   # @section -- Fluent Bit Log-Processing Sidecar
 fluentbit:
-  # -- Enable or disable the optional Fluent Bit log-processing sidecar. When enabled, the central log-scraping label is forced off (no override) and the Prometheus scrape port is pointed at Fluent Bit's merged /metrics endpoint. When disabled (the default), the chart behaves exactly as before.
+  # -- Enable or disable the optional Fluent Bit log-processing sidecar. When enabled, the central log-scraping label is forced off (no override) and, if accessLog.metrics is also enabled, the Prometheus scrape port is pointed at Fluent Bit's merged /metrics endpoint. When disabled (the default), no sidecar, ConfigMap or log destination is rendered.
   enabled: false
   image:
     # -- Docker image name for the Fluent Bit sidecar
@@ -233,7 +233,7 @@ fluentbit:
     forward:
       # -- Forward server errors (5xx) to central Alloy. On by default so incident-relevant logs reach Loki with no configuration.
       serverErrors: true
-      # -- Forward client errors (4xx) to central Alloy.
+      # -- Forward client errors (4xx) to central Alloy. On by default: 4xx is usually the first sign of a broken client integration or a bad route.
       clientErrors: true
       # -- Extra explicit status codes to forward beyond the error classes, e.g. [429, 499]. Everything not matched by any rule is dropped.
       statusCodes: []
@@ -278,10 +278,12 @@ fluentbit:
     # -- Forward error-log records at or above this severity, applied natively by nginx's error_log directive (records below never leave nginx). Ordering: debug < info < notice < warn < error < crit < alert < emerg. The OSS image cannot emit `debug` (needs a debug-enabled build).
     minLevel: warn
   lua:
-    # -- Mount a custom Lua script into the Fluent Bit sidecar for advanced filtering (e.g. latency-threshold forwarding) with no chart change. When enabled, the script is added to the Fluent Bit ConfigMap and mounted at /fluent-bit/scripts/custom.lua; reference it from a `- name: lua` filter entry you supply through fluentbit.accessLog.metrics.config (the chart never inserts one). When disabled (the default), no Lua key or volumeMount is rendered.
+    # -- Run a custom Lua script over the access-log records selected for forwarding — dropping, reshaping, enriching, parsing, anything the chart's own values cannot express. When enabled, the script is added to the Fluent Bit ConfigMap, mounted at /fluent-bit/scripts/custom.lua, and invoked by a `lua` filter placed after the forwarding grep. When disabled (the default), no Lua key, filter or volumeMount is rendered.
     enabled: false
     # -- Inline Lua script (tpl-rendered, so it can reference `.Release.Name`, chart values, etc.) mounted at /fluent-bit/scripts/custom.lua. Only used when enabled.
     script: ""
+    # -- Name of the function in `script` that the filter invokes. Must be a global function defined by the script.
+    call: filter
   debug:
     # -- Print the log stream to the sidecar's own stdout (`kubectl logs <pod> -c fluent-bit`) for troubleshooting. Always prints the records handed to the OTLP output; `stages` add earlier snapshots taken by `stdout` filters at those points in the pipeline. Off by default: it prints every record the sidecar handles, which is the volume this feature exists to avoid shipping.
     enabled: false

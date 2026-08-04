@@ -4,9 +4,9 @@
 # `access_log syslog:server=127.0.0.1` behave exactly as they do in a pod. nginx owns the
 # namespace and therefore publishes the ports for both containers.
 #
-# The forwarding path mirrors production -- sidecar -> OTLP/HTTP -> collector -> Loki:
-# otel-collector stands in for central Alloy and prints every record it receives fully
-# decoded, then passes it to lgtm, where it can be queried like any other log.
+# The forwarding path mirrors production -- sidecar -> OTLP/HTTP -> collector: otel-collector
+# stands in for central Alloy and prints every record it receives fully decoded. Repoint the
+# sidecar at lgtm (see README.md) to browse the same records in Grafana instead.
 #
 # Configs come from ./rendered/, produced by ./render.py -- see README.md.
 
@@ -57,12 +57,11 @@ services:
     volumes:
       - ./otel-collector.yaml:/etc/otelcol/config.yaml:ro
       - ./logs:/tmp/logs/:rw
-    depends_on:
-      - lgtm
 
-  # OTel Collector -> Loki/Prometheus/Tempo + Grafana. Large image (~1.5 GB), pulled once.
+  # The alternative backend: OTLP -> Loki/Prometheus/Tempo + Grafana, for when the records are
+  # worth browsing rather than tailing. Large image (~1.5 GB), pulled once.
   lgtm:
     image: grafana/otel-lgtm:${LGTM_TAG:-latest}
     ports:
       - "3000:3000" # Grafana
-      - "3100:3100" # Loki HTTP API, what ./loki.py queries
+      - "3100:3100" # Loki HTTP API

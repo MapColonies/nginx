@@ -11,7 +11,8 @@
 # forwards only those to central Alloy over OTLP. Everything else is dropped at the source.
 #
 # Metrics pipeline (fluentbit.accessLog.metrics): derive Prometheus metrics from the same
-# stream, merge with the scraped nginx exporter, and serve one /metrics endpoint.
+# stream, merge with the scraped nginx exporter, and serve one /metrics endpoint. Fluent Bit's
+# own `fluentbit_metrics` input is deliberately not collected — too noisy to be worth the series.
 {{- $debug := .Values.fluentbit.debug }}
 {{- $stages := ternary $debug.stages (dict) $debug.enabled }}
 
@@ -63,13 +64,7 @@ pipeline:
       buffer_chunk_size: 32k
       buffer_max_size: 64k
 {{- end }}
-{{- if .Values.fluentbit.accessLog.metrics.enabled }}
-    # Fluent Bit's own metrics (records/bytes in and out, retries, uptime) — a rough signal for
-    # sizing the sidecar (compare input records against nginx's request count).
-    # - name: fluentbit_metrics
-    #   tag: nginx.metrics.fluentbit
-    #   scrape_interval: 30
-{{- if .Values.fluentbit.accessLog.metrics.scrapeExporter }}
+{{- if and .Values.fluentbit.accessLog.metrics.enabled .Values.fluentbit.accessLog.metrics.scrapeExporter }}
     # Scrape the existing nginx-prometheus-exporter so its stub_status gauges merge into the
     # single /metrics endpoint below (port = the exporter's own mclabels.prometheus.port).
     - name: prometheus_scrape
@@ -77,7 +72,6 @@ pipeline:
       host: 127.0.0.1
       port: {{ .Values.mclabels.prometheus.port }}
       metrics_path: /metrics
-{{- end }}
 {{- end }}
 
   filters:
@@ -123,6 +117,15 @@ pipeline:
     - name: grep
       match: nginx.access
       regex: {{ printf "$Attributes['http.response.status_code'] %s" (include "nginx.fluentbit.accessLogRegex" .) | quote }}
+{{- if .Values.fluentbit.lua.enabled }}
+    # Operator hook (fluentbit.lua): after the forwarding grep, so the script only sees records
+    # already selected for shipping, and before the flatten filter below, which is what keeps
+    # `record["Attributes"]` reachable from the script.
+    - name: lua
+      match: nginx.access
+      script: /fluent-bit/scripts/custom.lua
+      call: {{ .Values.fluentbit.lua.call }}
+{{- end }}
 {{- if .Values.fluentbit.errorLog.enabled }}
     # Parse the plaintext nginx error line into structured fields, using the nginx_error parser
     # defined above. Severity is already filtered at nginx, so no grep.
@@ -192,8 +195,8 @@ pipeline:
       match_regex: ^nginx\.(access|error)$
 {{- end }}
 {{- if .Values.fluentbit.accessLog.metrics.enabled }}
-    # Serve the merged /metrics (log-derived + scraped exporter + Fluent Bit's own) on
-    # metrics.port. `match: '*'` is safe — prometheus_exporter only handles metric events.
+    # Serve the merged /metrics (log-derived + scraped exporter) on metrics.port.
+    # `match: '*'` is safe — prometheus_exporter only handles metric events.
     - name: prometheus_exporter
       match: '*'
       host: 0.0.0.0

@@ -30,7 +30,9 @@ Since we are using [Open Policy Agent](https://www.openpolicyagent.org/) (aka `O
 
 ### Log Format
 
-The docker image provides default log format (`/etc/nginx/log_format`). It's not possible to extend the log format, so if you'd want to add/remove certain fields you have to override it.
+The docker image provides a default JSON log format (`/etc/nginx/log_format.conf`). It can't be extended in place, so adding or removing fields means overriding the whole file.
+
+When the Fluent Bit sidecar is enabled, the chart renders a second, human-readable format alongside it: `kubectl logs` gets the readable one while the JSON format goes to the sidecar. Controlled by `fluentbit.accessLog.stdoutReadable`.
 
 ## Helm Chart
 
@@ -45,6 +47,8 @@ These are the main parameters you should adjust when you deploy this Helm Chart.
 There's an option to dynamically add annotations to the pod. You might find it useful if you operate on different environments and need to customize your annotations. It can be done by editing the `additionalPodAnnotations` parameter.
 
 There's support for instrumenting NGINX with OpenTelemetry (currently only for tracing). Simply the relevant parameters in the `values.yaml` file.
+
+There's also an optional Fluent Bit log-processing sidecar, off by default. When enabled it forwards only the selected access-log statuses and error-log severities to a central OTLP/HTTP endpoint instead of shipping every line, and derives Prometheus metrics from the access log — merged with the NGINX exporter's series onto one `/metrics` endpoint. See the `fluentbit` parameters in [values.md](./helm/values.md).
 
 #### Overriding NGINX configuration files
 
