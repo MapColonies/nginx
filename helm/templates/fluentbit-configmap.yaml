@@ -7,6 +7,9 @@ metadata:
     {{- include "nginx.labels" . | nindent 4 }}
 data:
   fluent-bit.yaml: {{ tpl (.Files.Get "config/fluent-bit.yaml") . | quote }}
+  # Chart-owned Lua, referenced by the pipeline's last filter. Distinct key and mount path from
+  # the optional user script below, so the two coexist as independent filters.
+  metadata.lua: {{ .Files.Get "config/metadata.lua" | quote }}
   {{- if .Values.fluentbit.lua.enabled }}
   fluent-bit.lua: {{ tpl .Values.fluentbit.lua.script . | quote }}
   {{- end }}

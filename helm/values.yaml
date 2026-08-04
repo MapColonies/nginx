@@ -286,7 +286,7 @@ fluentbit:
     # -- Print the log stream to the sidecar's own stdout (`kubectl logs <pod> -c fluent-bit`) for troubleshooting. Always prints the records handed to the OTLP output; `stages` add earlier snapshots taken by `stdout` filters at those points in the pipeline. Off by default: it prints every record the sidecar handles, which is the volume this feature exists to avoid shipping.
     enabled: false
     # -- Fluent Bit's service log level while debug is enabled. `debug` reports plugin-level decisions, `trace` is extremely verbose. When debug is disabled the level is always `info`.
-    logLevel: debug
+    logLevel: info
     stages:
       # -- Dump records as they arrive from nginx, before the body is decoded. Answers "is nginx delivering anything, and is the syslog envelope what Fluent Bit expects" — the only stage that shows lines the parser later rejects.
       received: false

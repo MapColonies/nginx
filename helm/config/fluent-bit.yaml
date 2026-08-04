@@ -14,6 +14,7 @@
 # stream, merge with the scraped nginx exporter, and serve one /metrics endpoint.
 {{- $debug := .Values.fluentbit.debug }}
 {{- $stages := ternary $debug.stages (dict) $debug.enabled }}
+
 service:
   flush: 1
   daemon: off
@@ -136,6 +137,22 @@ pipeline:
       match: nginx.error
 {{- end }}
 {{- end }}
+    # Last filter, deliberately: it moves the decoded fields out of the record body into the
+    # record's metadata, after which `$Attributes['…']` accessors (the greps and log_to_metrics
+    # above, and anything supplied through fluentbit.accessLog.metrics.config) no longer resolve.
+    - name: lua
+      match: nginx.access
+      script: /fluent-bit/etc/metadata.lua
+      call: flatten_attributes
+{{- if .Values.fluentbit.errorLog.enabled }}
+    # Same treatment for the error pipeline, whose records reach here with the nginx_error
+    # parser's field names: rewritten to semconv attributes in metadata + an OTel envelope, so
+    # both outputs below are identical apart from the tag they match.
+    - name: lua
+      match: nginx.error
+      script: /fluent-bit/etc/metadata.lua
+      call: flatten_error
+{{- end }}
 
   outputs:
     # Forward the surviving records to the dedicated central Alloy OTLP/HTTP logs endpoint
@@ -145,25 +162,27 @@ pipeline:
       host: {{ include "nginx.fluentbit.logsHost" . | quote }}
       port: {{ .Values.fluentbit.output.logs.port }}
       logs_uri: /v1/logs
+      # The Lua filter leaves the nginx `Body` field as the only body candidate; naming it keeps
+      # the output from shipping the whole record as the log body.
+      logs_body_key: $Body
       {{- if eq .Values.fluentbit.output.logs.protocol "https" }}
       tls: on
       {{- end }}
+      {{- include "nginx.fluentbit.logsProcessors" . | nindent 6 }}
 {{- if .Values.fluentbit.errorLog.enabled }}
-    # Error-log records to the same OTLP logs endpoint as the access logs (tag-isolated).
-    # Unlike the access log, these records are not already OTel-shaped: without an explicit
-    # body/attribute mapping the output keeps only the message and discards the parsed
-    # level/pid/client/request fields.
+    # Error-log records to the same OTLP logs endpoint as the access logs (tag-isolated). Body
+    # and severity need no mapping here — the Lua filter already put the record in the same
+    # envelope, so the same resource attributes apply.
     - name: opentelemetry
       match: nginx.error
       host: {{ include "nginx.fluentbit.logsHost" . | quote }}
       port: {{ .Values.fluentbit.output.logs.port }}
       logs_uri: /v1/logs
-      logs_body_key: $message
-      logs_body_key_attributes: on
-      logs_severity_text_message_key: $level
+      logs_body_key: $Body
       {{- if eq .Values.fluentbit.output.logs.protocol "https" }}
       tls: on
       {{- end }}
+      {{- include "nginx.fluentbit.logsProcessors" . | nindent 6 }}
 {{- end }}
 {{- if $debug.enabled }}
     # Debug: the records handed to the OTLP outputs above, i.e. what actually reaches Alloy once

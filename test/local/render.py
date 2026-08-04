@@ -15,9 +15,9 @@ HERE = pathlib.Path(__file__).parent
 CHART = HERE.parent.parent / "helm"
 OUT = HERE / "rendered"
 
-# docker-compose.yml mounts this unconditionally, so it must exist even when the values
-# in use don't make the chart render it.
-ALWAYS_PRESENT = ("fluent-bit.yaml",)
+# docker-compose.yml mounts these unconditionally, so they must exist even when the values
+# in use don't make the chart render them.
+ALWAYS_PRESENT = ("fluent-bit.yaml", "metadata.lua", "fluent-bit.lua")
 
 cmd = ["helm", "template", "lab", str(CHART), "-f", str(HERE / "lab-values.yaml")] + sys.argv[1:]
 proc = subprocess.run(cmd, capture_output=True, text=True)
@@ -46,7 +46,9 @@ for name in ALWAYS_PRESENT:
 
 OUT.mkdir(exist_ok=True)
 for stale in OUT.iterdir():
-    if stale.name not in files:
+    # Everything in rendered/ comes from the chart; the is_file() guard only keeps a stray
+    # directory from turning this cleanup into an IsADirectoryError.
+    if stale.name not in files and stale.is_file():
         stale.unlink()
 
 # Overwrite in place rather than unlink+recreate: docker bind-mounts a single file by inode,

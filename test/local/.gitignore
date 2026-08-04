@@ -1,2 +1,3 @@
 rendered/
 __pycache__/
+logs/*.json

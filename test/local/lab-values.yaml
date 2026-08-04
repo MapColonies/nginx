@@ -22,6 +22,8 @@ route:
 
 fluentbit:
   enabled: true
+  debug:
+    enabled: true
   output:
     logs:
       # The harness's stand-in for central Alloy (docker-compose.yml).

@@ -33,6 +33,12 @@ services:
     command: ["-c", "/fluent-bit/etc/fluent-bit.yaml"]
     volumes:
       - ./rendered/fluent-bit.yaml:/fluent-bit/etc/fluent-bit.yaml:ro
+      - ./rendered/metadata.lua:/fluent-bit/etc/metadata.lua:ro
+      # fluentbit.lua.script when set; a placeholder Fluent Bit never loads when it isn't.
+      - ./rendered/fluent-bit.lua:/fluent-bit/scripts/custom.lua:ro
+    # Stands in for the downward API: in a pod the chart injects this from metadata.uid.
+    environment:
+      POD_UID: ${POD_UID:-00000000-0000-0000-0000-000000000000}
 
   # Present so fluentbit.accessLog.metrics.scrapeExporter (on by default) has something real
   # to scrape, and the merged /metrics can be checked for the stub_status gauges.
@@ -50,6 +56,7 @@ services:
     command: ["--config=/etc/otelcol/config.yaml"]
     volumes:
       - ./otel-collector.yaml:/etc/otelcol/config.yaml:ro
+      - ./logs:/tmp/logs/:rw
     depends_on:
       - lgtm
 
