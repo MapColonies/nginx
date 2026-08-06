@@ -52,7 +52,7 @@ spec:
     {{- end }}
       volumes:
         - name: nginx-base-config
-          configMap:	
+          configMap:
             name: {{ printf "%s-base-configmap" (include "nginx.fullname" .) }}
           {{- if .Values.extraVolumes }}
             {{ tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
@@ -124,7 +124,7 @@ spec:
           {{- end }}
           {{- end }}
         {{- if .Values.fluentbit.enabled }}
-        {{- include "nginx.fluentbitContainer" . | nindent 8 }}
+        {{- include "nginx.fluentbit.container" . | nindent 8 }}
         {{- end }}
         {{- if .Values.sidecars }}
         {{ tpl (.Values.sidecars) . | nindent 8 }}

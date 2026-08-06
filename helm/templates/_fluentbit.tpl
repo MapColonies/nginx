@@ -3,7 +3,7 @@ Fluent Bit sidecar container. The merged /metrics port is declared only when
 accessLog.metrics.enabled — the prometheus_exporter output is gated on the same value, so
 declaring it unconditionally would advertise a port with nothing serving it.
 */}}
-{{- define "nginx.fluentbitContainer" -}}
+{{- define "nginx.fluentbit.container" -}}
 - name: fluent-bit
   {{- with .Values.fluentbit.image }}
   image: {{ include "nginx.cloudProviderDockerRegistryUrl" $ }}{{ .repository }}:{{ .tag }}
@@ -17,7 +17,6 @@ declaring it unconditionally would advertise a port with nothing serving it.
     - name: fluentbit-config
       mountPath: /fluent-bit/etc/fluent-bit.yaml
       subPath: fluent-bit.yaml
-    # The chart's Lua filter, next to the config; the optional user script gets its own path.
     - name: fluentbit-config
       mountPath: /fluent-bit/etc/metadata.lua
       subPath: metadata.lua
@@ -76,4 +75,61 @@ processors:
       action: upsert
       key: k8s.pod.uid
       value: ${POD_UID}
+{{- end -}}
+
+{{/*
+One OTLP/HTTP logs output, parameterised by the tag it matches (dict: ctx, match). Both
+pipelines ship to the same dedicated central Alloy logs endpoint (fluentbit.output.logs.*,
+deliberately NOT the traces-only opentelemetry.exporterHost), and the Lua filters put access
+and error records in the same envelope — so the two outputs differ only in that tag.
+*/}}
+{{- define "nginx.fluentbit.logsOutput" -}}
+{{- $ := .ctx -}}
+- name: opentelemetry
+  match: {{ .match }}
+  host: {{ include "nginx.fluentbit.logsHost" $ | quote }}
+  port: {{ $.Values.fluentbit.output.logs.port }}
+  logs_uri: /v1/logs
+  # The Lua filter leaves the nginx `Body` field as the only body candidate; naming it keeps the
+  # output from shipping the whole record as the log body.
+  logs_body_key: $Body
+  {{- if eq $.Values.fluentbit.output.logs.protocol "https" }}
+  tls: on
+  {{- end }}
+  {{- include "nginx.fluentbit.logsProcessors" $ | nindent 2 }}
+{{- end -}}
+
+{{/*
+Compile the access-log forwarding rules (fluentbit.accessLog.forward) into a single regex
+for Fluent Bit's grep filter, matched against the HTTP status code. serverErrors adds 5xx
+(`5`), clientErrors adds 4xx (`4`), and each explicit statusCodes entry is added verbatim; a
+status matches when it starts with any alternative (e.g. `^(5|429)`). When no rule is active
+the regex is `^$`, which matches only an empty string — so every real (non-empty) status is
+dropped and nothing is forwarded.
+*/}}
+{{- define "nginx.fluentbit.accessLogRegex" -}}
+{{- $parts := list -}}
+{{- if .Values.fluentbit.accessLog.forward.serverErrors -}}
+{{- $parts = append $parts "5" -}}
+{{- end -}}
+{{- if .Values.fluentbit.accessLog.forward.clientErrors -}}
+{{- $parts = append $parts "4" -}}
+{{- end -}}
+{{- range .Values.fluentbit.accessLog.forward.statusCodes -}}
+{{- $parts = append $parts (toString .) -}}
+{{- end -}}
+{{- if $parts -}}
+^({{ join "|" $parts }})
+{{- else -}}
+^$
+{{- end -}}
+{{- end -}}
+
+{{/*
+The central Alloy OTLP logs host. Required whenever the sidecar is enabled — an empty
+value renders a Fluent Bit config that crash-loops on startup, so fail the release
+instead with a message that names the value to set.
+*/}}
+{{- define "nginx.fluentbit.logsHost" -}}
+{{- required "fluentbit.output.logs.host is required when fluentbit.enabled is true — set it to the central Alloy OTLP logs endpoint" .Values.fluentbit.output.logs.host -}}
 {{- end -}}

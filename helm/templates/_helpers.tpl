@@ -159,41 +159,6 @@ split_clients "$otel_trace_id" $ratio_sampler {
 {{- end -}}
 
 {{/*
-Compile the access-log forwarding rules (fluentbit.accessLog.forward) into a single regex
-for Fluent Bit's grep filter, matched against the HTTP status code. serverErrors adds 5xx
-(`5`), clientErrors adds 4xx (`4`), and each explicit statusCodes entry is added verbatim; a
-status matches when it starts with any alternative (e.g. `^(5|429)`). When no rule is active
-the regex is `^$`, which matches only an empty string — so every real (non-empty) status is
-dropped and nothing is forwarded.
-*/}}
-{{- define "nginx.fluentbit.accessLogRegex" -}}
-{{- $parts := list -}}
-{{- if .Values.fluentbit.accessLog.forward.serverErrors -}}
-{{- $parts = append $parts "5" -}}
-{{- end -}}
-{{- if .Values.fluentbit.accessLog.forward.clientErrors -}}
-{{- $parts = append $parts "4" -}}
-{{- end -}}
-{{- range .Values.fluentbit.accessLog.forward.statusCodes -}}
-{{- $parts = append $parts (toString .) -}}
-{{- end -}}
-{{- if $parts -}}
-^({{ join "|" $parts }})
-{{- else -}}
-^$
-{{- end -}}
-{{- end -}}
-
-{{/*
-The central Alloy OTLP logs host. Required whenever the sidecar is enabled — an empty
-value renders a Fluent Bit config that crash-loops on startup, so fail the release
-instead with a message that names the value to set.
-*/}}
-{{- define "nginx.fluentbit.logsHost" -}}
-{{- required "fluentbit.output.logs.host is required when fluentbit.enabled is true — set it to the central Alloy OTLP logs endpoint" .Values.fluentbit.output.logs.host -}}
-{{- end -}}
-
-{{/*
 Generate OpenTelemetry trace configuration
 */}}
 {{- define "nginx.otelTrace" -}}

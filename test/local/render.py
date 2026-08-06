@@ -30,12 +30,8 @@ try:
 except ImportError:
     sys.exit("pyyaml is required: pip install pyyaml")
 
-# helm/templates/deployment.yaml has a trailing tab after `configMap:`. Go's YAML parser
-# tolerates it, PyYAML does not.
-sanitized = "\n".join(line.rstrip() for line in proc.stdout.splitlines())
-
 files = {}
-for doc in yaml.safe_load_all(sanitized):
+for doc in yaml.safe_load_all(proc.stdout):
     if not doc or doc.get("kind") != "ConfigMap":
         continue
     files.update(doc.get("data") or {})
@@ -46,8 +42,7 @@ for name in ALWAYS_PRESENT:
 
 OUT.mkdir(exist_ok=True)
 for stale in OUT.iterdir():
-    # Everything in rendered/ comes from the chart; the is_file() guard only keeps a stray
-    # directory from turning this cleanup into an IsADirectoryError.
+    # is_file() so a stray directory doesn't turn this cleanup into an IsADirectoryError.
     if stale.name not in files and stale.is_file():
         stale.unlink()
 

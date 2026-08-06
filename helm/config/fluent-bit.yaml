@@ -1,18 +1,10 @@
-# Fluent Bit configuration, rendered through Helm `tpl` from the chart ConfigMap
-# (mirroring how nginx.conf / log_format.conf are shipped).
+# Fluent Bit configuration, rendered through Helm `tpl` from the chart ConfigMap.
 #
-# YAML, not classic `.conf`: only YAML config supports `processors`, which is the only way to
-# reach the OTLP resource/scope of an outgoing record (`content_modifier` with
-# `context: otel_resource_attributes`). Classic config can set log attributes but never
-# resource attributes, so every forwarded record arrives at Loki as `unknown_service`.
+# YAML, not classic `.conf`: only YAML config supports `processors`, the one way to reach an
+# outgoing record's OTLP resource attributes. Classic config can set log attributes but never
+# resource ones, so every forwarded record would arrive at Loki as `unknown_service`.
 #
-# Access-log forwarding pipeline: nginx ships its JSON access log here over syslog UDP on
-# loopback (best-effort); Fluent Bit filters it down to the selected status codes and
-# forwards only those to central Alloy over OTLP. Everything else is dropped at the source.
-#
-# Metrics pipeline (fluentbit.accessLog.metrics): derive Prometheus metrics from the same
-# stream, merge with the scraped nginx exporter, and serve one /metrics endpoint. Fluent Bit's
-# own `fluentbit_metrics` input is deliberately not collected — too noisy to be worth the series.
+# Fluent Bit's own `fluentbit_metrics` input is deliberately not collected — too noisy.
 {{- $debug := .Values.fluentbit.debug }}
 {{- $stages := ternary $debug.stages (dict) $debug.enabled }}
 
@@ -53,7 +45,6 @@ pipeline:
       buffer_chunk_size: 32k
       buffer_max_size: 64k
 {{- if .Values.fluentbit.errorLog.enabled }}
-    # Error-log pipeline: distinct port and tag (nginx.error) from the access pipeline.
     # Same RFC3164 framing as the access log, so the same explicit parser is required.
     - name: syslog
       tag: nginx.error
@@ -109,14 +100,24 @@ pipeline:
 {{- end }}
 {{- if .Values.fluentbit.accessLog.metrics.enabled }}
     # Derive metrics from the full stream, before grep drops the non-forwarded records, so the
-    # counters cover every request. Overridable fluentbit.accessLog.metrics.config (tpl).
-{{- tpl (toYaml .Values.fluentbit.accessLog.metrics.config) . | nindent 4 }}
+    # counters cover every request. Overridable via fluentbit.accessLog.metrics.filters (tpl).
+{{- tpl (toYaml .Values.fluentbit.accessLog.metrics.filters) . | nindent 4 }}
 {{- end }}
     # Keep only the status codes selected by fluentbit.accessLog.forward; drop everything else.
     # When no forwarding rule is active the regex matches nothing, so all records are dropped.
     - name: grep
       match: nginx.access
       regex: {{ printf "$Attributes['http.response.status_code'] %s" (include "nginx.fluentbit.accessLogRegex" .) | quote }}
+{{- if .Values.fluentbit.maskQueryParams }}
+    # Mask fluentbit.maskQueryParams in the fields that carry the query string: url.query,
+    # url.full and the request line in `Body`. Only the forwarded records need it, and it has to
+    # precede both filters below: the hook would see the raw token, flatten puts Attributes out of
+    # reach. The error pipeline is masked in envelope_error, once its request line is parsed.
+    - name: lua
+      match: nginx.access
+      script: /fluent-bit/etc/metadata.lua
+      call: mask_query_params
+{{- end }}
 {{- if .Values.fluentbit.lua.enabled }}
     # Operator hook (fluentbit.lua): after the forwarding grep, so the script only sees records
     # already selected for shipping, and before the flatten filter below, which is what keeps
@@ -142,7 +143,7 @@ pipeline:
 {{- end }}
     # Last filter, deliberately: it moves the decoded fields out of the record body into the
     # record's metadata, after which `$Attributes['…']` accessors (the greps and log_to_metrics
-    # above, and anything supplied through fluentbit.accessLog.metrics.config) no longer resolve.
+    # above, and anything supplied through fluentbit.accessLog.metrics.filters) no longer resolve.
     - name: lua
       match: nginx.access
       script: /fluent-bit/etc/metadata.lua
@@ -154,38 +155,13 @@ pipeline:
     - name: lua
       match: nginx.error
       script: /fluent-bit/etc/metadata.lua
-      call: flatten_error
+      call: envelope_error
 {{- end }}
 
   outputs:
-    # Forward the surviving records to the dedicated central Alloy OTLP/HTTP logs endpoint
-    # (fluentbit.output.logs.*, deliberately NOT the traces-only opentelemetry.exporterHost).
-    - name: opentelemetry
-      match: nginx.access
-      host: {{ include "nginx.fluentbit.logsHost" . | quote }}
-      port: {{ .Values.fluentbit.output.logs.port }}
-      logs_uri: /v1/logs
-      # The Lua filter leaves the nginx `Body` field as the only body candidate; naming it keeps
-      # the output from shipping the whole record as the log body.
-      logs_body_key: $Body
-      {{- if eq .Values.fluentbit.output.logs.protocol "https" }}
-      tls: on
-      {{- end }}
-      {{- include "nginx.fluentbit.logsProcessors" . | nindent 6 }}
+    {{- include "nginx.fluentbit.logsOutput" (dict "ctx" . "match" "nginx.access") | nindent 4 }}
 {{- if .Values.fluentbit.errorLog.enabled }}
-    # Error-log records to the same OTLP logs endpoint as the access logs (tag-isolated). Body
-    # and severity need no mapping here — the Lua filter already put the record in the same
-    # envelope, so the same resource attributes apply.
-    - name: opentelemetry
-      match: nginx.error
-      host: {{ include "nginx.fluentbit.logsHost" . | quote }}
-      port: {{ .Values.fluentbit.output.logs.port }}
-      logs_uri: /v1/logs
-      logs_body_key: $Body
-      {{- if eq .Values.fluentbit.output.logs.protocol "https" }}
-      tls: on
-      {{- end }}
-      {{- include "nginx.fluentbit.logsProcessors" . | nindent 6 }}
+    {{- include "nginx.fluentbit.logsOutput" (dict "ctx" . "match" "nginx.error") | nindent 4 }}
 {{- end }}
 {{- if $debug.enabled }}
     # Debug: the records handed to the OTLP outputs above, i.e. what actually reaches Alloy once
