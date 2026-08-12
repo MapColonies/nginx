@@ -7,6 +7,7 @@
 # Fluent Bit's own `fluentbit_metrics` input is deliberately not collected — too noisy.
 {{- $debug := .Values.fluentbit.debug }}
 {{- $stages := ternary $debug.stages (dict) $debug.enabled }}
+{{- include "nginx.fluentbit.luaCallsGuard" . }}
 
 service:
   flush: 1
@@ -98,6 +99,15 @@ pipeline:
       match: nginx.access
       exclude: {{ printf "%s %s" .Values.fluentbit.accessLog.exclude.key .Values.fluentbit.accessLog.exclude.regex | quote }}
 {{- end }}
+{{- if and .Values.fluentbit.lua.enabled .Values.fluentbit.lua.calls.allRecords }}
+    # Operator hook (fluentbit.lua.calls.allRecords): ahead of the metrics filters, so fields the
+    # script adds here can be an add_label or value_field accessor. After the exclude grep, so
+    # dropped probe traffic pays no Lua call — the metrics filters do not see those records either.
+    - name: lua
+      match: nginx.access
+      script: /fluent-bit/scripts/custom.lua
+      call: {{ .Values.fluentbit.lua.calls.allRecords }}
+{{- end }}
 {{- if .Values.fluentbit.accessLog.metrics.enabled }}
     # Derive metrics from the full stream, before grep drops the non-forwarded records, so the
     # counters cover every request. Overridable via fluentbit.accessLog.metrics.filters (tpl).
@@ -111,21 +121,22 @@ pipeline:
 {{- if .Values.fluentbit.maskQueryParams }}
     # Mask fluentbit.maskQueryParams in the fields that carry the query string: url.query,
     # url.full and the request line in `Body`. Only the forwarded records need it, and it has to
-    # precede both filters below: the hook would see the raw token, flatten puts Attributes out of
-    # reach. The error pipeline is masked in envelope_error, once its request line is parsed.
+    # precede both filters below: the forwardedOnly hook would see the raw token, flatten puts
+    # Attributes out of reach. An allRecords hook runs earlier still, so it sees the query string
+    # unmasked. The error pipeline is masked in envelope_error, once its request line is parsed.
     - name: lua
       match: nginx.access
       script: /fluent-bit/etc/metadata.lua
       call: mask_query_params
 {{- end }}
-{{- if .Values.fluentbit.lua.enabled }}
-    # Operator hook (fluentbit.lua): after the forwarding grep, so the script only sees records
-    # already selected for shipping, and before the flatten filter below, which is what keeps
-    # `record["Attributes"]` reachable from the script.
+{{- if and .Values.fluentbit.lua.enabled .Values.fluentbit.lua.calls.forwardedOnly }}
+    # Operator hook (fluentbit.lua.calls.forwardedOnly): after the forwarding grep, so the script
+    # only sees records already selected for shipping, and before the flatten filter below, which
+    # is what keeps `record["Attributes"]` reachable from the script.
     - name: lua
       match: nginx.access
       script: /fluent-bit/scripts/custom.lua
-      call: {{ .Values.fluentbit.lua.call }}
+      call: {{ .Values.fluentbit.lua.calls.forwardedOnly }}
 {{- end }}
 {{- if .Values.fluentbit.errorLog.enabled }}
     # Parse the plaintext nginx error line into structured fields, using the nginx_error parser

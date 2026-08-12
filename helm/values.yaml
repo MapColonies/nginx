@@ -281,12 +281,15 @@ fluentbit:
     # -- Forward error-log records at or above this severity, applied natively by nginx's error_log directive (records below never leave nginx). Ordering: debug < info < notice < warn < error < crit < alert < emerg. The OSS image cannot emit `debug` (needs a debug-enabled build).
     minLevel: warn
   lua:
-    # -- Run a custom Lua script over the access-log records selected for forwarding — anything the chart's own values cannot express. Mounted at /fluent-bit/scripts/custom.lua and invoked by a `lua` filter placed after the forwarding grep. Off by default.
+    # -- Run a custom Lua script over the access-log records — anything the chart's own values cannot express. Mounted at /fluent-bit/scripts/custom.lua and invoked at each position named under `calls`. Off by default; enabling it without naming a call fails the render.
     enabled: false
-    # -- Inline Lua script (tpl-rendered, so it can reference `.Release.Name`, chart values, etc.) mounted at /fluent-bit/scripts/custom.lua. Only used when enabled.
+    # -- Inline Lua script (tpl-rendered, so it can reference `.Release.Name`, chart values, etc.) mounted at /fluent-bit/scripts/custom.lua. One script serves both calls. Only used when enabled.
     script: ""
-    # -- Name of the function in `script` that the filter invokes. Must be a global function defined by the script.
-    call: filter
+    calls:
+      # -- Global function invoked on every record that survived the parse guard and the exclude grep, before the metrics filters — the only position whose added fields `accessLog.metrics.filters` can reference. Sees every status code, not just the forwarded ones, and runs before query-parameter masking, so it handles unmasked query strings. Empty disables this position.
+      allRecords: ""
+      # -- Global function invoked after the forwarding grep, on the records selected for shipping only — cheaper than `allRecords`, but too late to feed metrics. `record["Attributes"]` is still reachable. Empty disables this position.
+      forwardedOnly: ""
   debug:
     # -- Print the log stream to the sidecar's own stdout (`kubectl logs <pod> -c fluent-bit`). Prints the records handed to the OTLP output; `stages` add earlier snapshots. Off by default — it prints every record the sidecar handles.
     enabled: false

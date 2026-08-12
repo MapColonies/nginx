@@ -133,3 +133,15 @@ instead with a message that names the value to set.
 {{- define "nginx.fluentbit.logsHost" -}}
 {{- required "fluentbit.output.logs.host is required when fluentbit.enabled is true — set it to the central Alloy OTLP logs endpoint" .Values.fluentbit.output.logs.host -}}
 {{- end -}}
+
+{{/*
+The operator Lua hook renders a filter per named entry point, so enabling it without naming any
+mounts a script nothing ever calls — silently a no-op rather than a visible error. Fail the
+render instead, naming both values, as with the required logs host above.
+*/}}
+{{- define "nginx.fluentbit.luaCallsGuard" -}}
+{{- $lua := .Values.fluentbit.lua -}}
+{{- if and $lua.enabled (not (or $lua.calls.allRecords $lua.calls.forwardedOnly)) -}}
+{{- fail "fluentbit.lua.enabled is true but no entry point is named — set fluentbit.lua.calls.allRecords and/or fluentbit.lua.calls.forwardedOnly to a global function defined by fluentbit.lua.script" -}}
+{{- end -}}
+{{- end -}}

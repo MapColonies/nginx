@@ -30,7 +30,7 @@ local function mask(value)
 end
 
 -- Its own filter rather than part of flatten_attributes below, so it can run ahead of the
--- operator's Lua hook while `record["Attributes"]` is still reachable.
+-- operator's forwardedOnly hook while `record["Attributes"]` is still reachable.
 function mask_query_params(tag, timestamp, group, metadata, record)
     local modified = false
 
