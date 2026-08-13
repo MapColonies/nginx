@@ -61,6 +61,11 @@ spec:
         - name: fluentbit-config
           configMap:
             name: {{ printf "%s-fluentbit-configmap" (include "nginx.fullname" .) }}
+        {{- if and .Values.fluentbit.lua.enabled (eq (include "nginx.fluentbit.luaSource" .) "configMap") }}
+        - name: fluentbit-lua
+          configMap:
+            name: {{ .Values.fluentbit.lua.configMap.name }}
+        {{- end }}
         {{- end }}
       containers:
         - name: nginx

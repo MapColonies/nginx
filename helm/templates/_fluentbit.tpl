@@ -21,9 +21,16 @@ declaring it unconditionally would advertise a port with nothing serving it.
       mountPath: /fluent-bit/etc/metadata.lua
       subPath: metadata.lua
     {{- if .Values.fluentbit.lua.enabled }}
+    {{- if eq (include "nginx.fluentbit.luaSource" .) "configMap" }}
+    # The operator's own ConfigMap, mounted at the same path the filters name.
+    - name: fluentbit-lua
+      mountPath: /fluent-bit/scripts/custom.lua
+      subPath: {{ .Values.fluentbit.lua.configMap.key }}
+    {{- else }}
     - name: fluentbit-config
       mountPath: /fluent-bit/scripts/custom.lua
       subPath: fluent-bit.lua
+    {{- end }}
     {{- end }}
   # Read as the k8s.pod.uid resource attribute by the OTLP output.
   env:
@@ -142,6 +149,29 @@ render instead, naming both values, as with the required logs host above.
 {{- define "nginx.fluentbit.luaCallsGuard" -}}
 {{- $lua := .Values.fluentbit.lua -}}
 {{- if and $lua.enabled (not (or $lua.calls.allRecords $lua.calls.forwardedOnly)) -}}
-{{- fail "fluentbit.lua.enabled is true but no entry point is named — set fluentbit.lua.calls.allRecords and/or fluentbit.lua.calls.forwardedOnly to a global function defined by fluentbit.lua.script" -}}
+{{- fail "fluentbit.lua.enabled is true but no entry point is named — set fluentbit.lua.calls.allRecords and/or fluentbit.lua.calls.forwardedOnly to a global function defined by the script" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Where the operator's Lua script comes from: `inline` (fluentbit.lua.script, carried on the
+chart's own ConfigMap) or `configMap` (one the operator maintains outside the release). Exactly
+one is required — both is ambiguous, neither points the filters at a script nobody mounted — so
+the single answer here is what the ConfigMap key, the volume and the mount all branch on.
+Only meaningful when fluentbit.lua.enabled; callers check that first.
+*/}}
+{{- define "nginx.fluentbit.luaSource" -}}
+{{- $lua := .Values.fluentbit.lua -}}
+{{- if and $lua.script $lua.configMap.name -}}
+{{- fail "fluentbit.lua.script and fluentbit.lua.configMap.name are mutually exclusive — set exactly one as the script source" -}}
+{{- else if $lua.configMap.name -}}
+{{- if not $lua.configMap.key -}}
+{{- fail "fluentbit.lua.configMap.key is required when fluentbit.lua.configMap.name is set — set it to the key holding the script" -}}
+{{- end -}}
+configMap
+{{- else if $lua.script -}}
+inline
+{{- else -}}
+{{- fail "fluentbit.lua.enabled is true but no script source is set — set fluentbit.lua.script or fluentbit.lua.configMap.name and .key" -}}
 {{- end -}}
 {{- end -}}

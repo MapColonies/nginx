@@ -283,8 +283,13 @@ fluentbit:
   lua:
     # -- Run a custom Lua script over the access-log records — anything the chart's own values cannot express. Mounted at /fluent-bit/scripts/custom.lua and invoked at each position named under `calls`. Off by default; enabling it without naming a call fails the render.
     enabled: false
-    # -- Inline Lua script (tpl-rendered, so it can reference `.Release.Name`, chart values, etc.) mounted at /fluent-bit/scripts/custom.lua. One script serves both calls. Only used when enabled.
+    # -- Inline Lua script (tpl-rendered, so it can reference `.Release.Name`, chart values, etc.) carried on the chart's own ConfigMap. One script serves both calls. Mutually exclusive with `configMap`; enabling the hook without exactly one source fails the render.
     script: ""
+    configMap:
+      # -- Name of an existing ConfigMap in the release namespace holding the script, mounted instead of `script` — for a script maintained outside this release. Editing it does not restart the sidecar (only the chart's own ConfigMap is checksummed into the pod template) and the mount is a subPath, which never updates in place: restart the pod to pick up a change. Empty means use `script`.
+      name: ""
+      # -- Key in that ConfigMap whose value is the script. Required when `name` is set.
+      key: ""
     calls:
       # -- Global function invoked on every record that survived the parse guard and the exclude grep, before the metrics filters — the only position whose added fields `accessLog.metrics.filters` can reference. Sees every status code, not just the forwarded ones, and runs before query-parameter masking, so it handles unmasked query strings. Empty disables this position.
       allRecords: ""
