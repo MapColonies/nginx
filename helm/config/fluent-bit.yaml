@@ -56,7 +56,7 @@ pipeline:
       buffer_chunk_size: 32k
       buffer_max_size: 64k
 {{- end }}
-{{- if and .Values.fluentbit.accessLog.metrics.enabled .Values.fluentbit.accessLog.metrics.scrapeExporter }}
+{{- if and .Values.fluentbit.accessLog.metrics.enabled  (and .Values.fluentbit.accessLog.metrics.scrapeExporter .Values.prometheusExporter.enabled) }}
     # Scrape the existing nginx-prometheus-exporter so its stub_status gauges merge into the
     # single /metrics endpoint below (port = the exporter's own mclabels.prometheus.port).
     - name: prometheus_scrape
