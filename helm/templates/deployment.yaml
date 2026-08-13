@@ -64,7 +64,7 @@ spec:
         {{- if and .Values.fluentbit.lua.enabled (eq (include "nginx.fluentbit.luaSource" .) "configMap") }}
         - name: fluentbit-lua
           configMap:
-            name: {{ .Values.fluentbit.lua.configMap.name }}
+            name: {{ tpl .Values.fluentbit.lua.configMap.name . }}
         {{- end }}
         {{- end }}
       containers:
