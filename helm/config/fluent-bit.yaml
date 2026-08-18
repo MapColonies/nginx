@@ -19,13 +19,21 @@ service:
 
 # Parses the standard open-source nginx error-log line into structured fields. Format:
 #   2024/01/15 10:23:45 [error] 1234#5678: *90 <message>, client: …, server: …, request: "…"
-# The leading timestamp is optional (some syslog paths strip it), the connection id (*cid) is
-# optional (worker/startup messages omit it), and the client/server/request tail is optional
-# and matched as a unit so a comma inside <message> does not truncate it.
+# The leading timestamp is optional (some syslog paths strip it) and the connection id (*cid) is
+# optional (worker/startup messages omit it). nginx always emits `client:`/`server:` as a pair,
+# but `request:` only once the request line has been read — so it is nested one level deeper,
+# keeping client/server on lines logged before that point ("client closed connection …", SSL
+# handshake failures) and on stream-module errors, which have no request at all.
+#
+# The tail is matched as one unit ending at `$`, with only nginx's own trailing fields (host,
+# referrer, upstream, subrequest, bytes) allowed to follow. Both anchors matter: without the `$`
+# a comma inside <message> truncates it, and without the trailing whitelist an attacker-supplied
+# URI echoed into <message> (`open() "/x, client: evil, server: fake" failed`) is picked up as
+# the client/server captures, because the lazy <message> stops at the first tail that matches.
 parsers:
   - name: nginx_error
     format: regex
-    regex: '^(?:(?<time>\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) )?\[(?<level>\w+)\] (?<pid>\d+)#\d+:(?: \*\d+)? (?<message>.*?)(?:, client: (?<client>[^,]+), server: (?<server>[^,]*), request: "(?<request>[^"]*)".*)?$'
+    regex: '^(?:(?<time>\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) )?\[(?<level>\w+)\] (?<pid>\d+)#\d+:(?: \*\d+)? (?<message>.*?)(?:, client: (?<client>[^,]+), server: (?<server>[^,]*)(?:, request: "(?<request>[^"]*)")?(?:, (?:subrequest|upstream|host|referrer|bytes)[^\n]*)?)?$'
     time_key: time
     time_format: '%Y/%m/%d %H:%M:%S'
     time_keep: off
