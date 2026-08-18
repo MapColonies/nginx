@@ -6,10 +6,13 @@ metadata:
   labels:
     {{- include "nginx.labels" . | nindent 4 }}
 data:
-  fluent-bit.yaml: {{ tpl (.Files.Get "config/fluent-bit.yaml") . | quote }}
+  fluent-bit.yaml: |
+    {{- tpl (.Files.Get "config/fluent-bit.yaml") . | nindent 4 }}
   # Chart-owned Lua; fluent-bit.lua below is the operator's, on its own key and mount.
-  metadata.lua: {{ tpl (.Files.Get "config/metadata.lua") . | quote }}
+  metadata.lua: | 
+    {{- tpl (.Files.Get "config/metadata.lua") . | nindent 4 }}
   {{- if and .Values.fluentbit.lua.enabled (eq (include "nginx.fluentbit.luaSource" .) "inline") }}
-  fluent-bit.lua: {{ tpl .Values.fluentbit.lua.script . | quote }}
+  fluent-bit.lua: |
+    {{- tpl .Values.fluentbit.lua.script . | nindent 4 }}
   {{- end }}
 {{- end }}
