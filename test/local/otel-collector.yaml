@@ -1,0 +1,24 @@
+# The harness's stand-in for central Alloy, and its window onto the wire.
+#
+# `debug` prints each OTLP log record fully decoded -- resource attributes, log attributes,
+# severity, body -- which is what tells a correctly shaped record from one whose whole envelope
+# was stuffed into the body. `file` keeps the same records as OTLP JSON in logs/out.json.
+# To browse them in Grafana instead, point the sidecar at lgtm directly -- see README.md.
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  debug:
+    verbosity: detailed
+  file:
+    path: /tmp/logs/out.json
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      exporters: [debug, file]

@@ -57,9 +57,9 @@ caKey: "ca.crt"
 
 image:
   # -- Docker image name
-  repository: nginx
+  repository: common/nginx
   # -- Docker image tag. If no value is specified, appVersion will be taken.
-  tag: ''
+  tag: ""
 # -- Port on which the application will listen
 port: 8080
 # -- Port to which the service will forward traffic
@@ -119,7 +119,7 @@ backend:
   # -- Enable or disable the backend service
   enabled: true
   # -- Backend service name for proxy_pass
-  host: ''
+  host: ""
   # -- Backend service port
   port: 8080
 
@@ -184,6 +184,127 @@ prometheusExporter:
         cpu: 100m
         # -- Memory request for the main container
         memory: 128Mi
+
+  # @section -- Fluent Bit Log-Processing Sidecar
+fluentbit:
+  # -- Enable the optional Fluent Bit log-processing sidecar (off by default). When on, the central log-scraping label is forced off, and the pod's advertised Prometheus port moves to Fluent Bit's merged /metrics endpoint if accessLog.metrics is also on.
+  enabled: false
+  image:
+    # -- Docker image name for the Fluent Bit sidecar
+    repository: common/fluent-bit
+    # -- Docker image tag for the Fluent Bit sidecar
+    tag: "5.0.7"
+    # -- Image pull policy for the Fluent Bit sidecar
+    pullPolicy: IfNotPresent
+  resources:
+    # -- Enable or disable resource limits and requests for the Fluent Bit sidecar
+    enabled: true
+    value:
+      limits:
+        # -- CPU limit for the Fluent Bit sidecar
+        cpu: 100m
+        # -- Memory limit for the Fluent Bit sidecar
+        memory: 128Mi
+      requests:
+        # -- CPU request for the Fluent Bit sidecar
+        cpu: 100m
+        # -- Memory request for the Fluent Bit sidecar
+        memory: 128Mi
+  output:
+    logs:
+      # -- Host of the dedicated central Alloy OTLP logs endpoint Fluent Bit forwards to. Deliberately NOT reused from opentelemetry.exporterHost (that is the traces-only endpoint). Required when the sidecar is enabled.
+      host: ""
+      # -- Port of the central Alloy OTLP/HTTP logs endpoint.
+      port: 4318
+      # -- Protocol used to reach the OTLP logs endpoint (http or https).
+      protocol: http
+  # -- Query parameters whose value is replaced with `[MASKED]` before a record leaves the sidecar. nginx logs the query verbatim in `url.query`, `url.full` and the request line in `Body` (and in the error log's request line), so a credential passed as `?token=` would otherwise reach Loki. Empty list disables masking.
+  maskQueryParams:
+    - token
+  accessLog:
+    # -- UDP port on loopback where Fluent Bit's syslog input listens and to which nginx forwards its JSON-formatted access log.
+    syslogPort: 5514
+    # -- When true, nginx writes a human-readable (combined-style) access log to stdout for kubectl logs; the JSON log always goes to Fluent Bit over syslog. When false, stdout also receives the JSON format.
+    stdoutReadable: true
+    exclude:
+      # -- Drop matching access-log records before metrics are derived and before forwarding, so probe traffic neither skews the metrics nor reaches Loki. For probes that hit the main server — the kubelet's `/nginx_status` is already unlogged by the image.
+      enabled: false
+      # -- Fluent Bit record accessor the exclude regex is matched against. Must be a field of the decoded JSON access log.
+      key: $Attributes['url.path']
+      # -- Regex matched against `key`; records that match are dropped. Covers the common liveness/readiness path spellings. Only used when enabled.
+      regex: ^/(health|healthz|live|livez|liveness|ready|readyz|readiness|nginx_status)$
+    forward:
+      # -- Forward server errors (5xx) to central Alloy. On by default so incident-relevant logs reach Loki with no configuration.
+      serverErrors: true
+      # -- Forward client errors (4xx) to central Alloy. On by default: 4xx is usually the first sign of a broken client integration or a bad route.
+      clientErrors: true
+      # -- Extra explicit status codes to forward beyond the error classes, e.g. [429, 499]. Everything not matched by any rule is dropped.
+      statusCodes: []
+    metrics:
+      # -- Derive Prometheus metrics from the access log and serve them on the merged /metrics endpoint. When false, no metrics blocks are rendered.
+      enabled: true
+      # -- Scrape the existing nginx-prometheus-exporter and merge its series into the endpoint, preserving the stub_status gauges.
+      scrapeExporter: true
+      # -- Port on which Fluent Bit serves the merged /metrics endpoint. When enabled, this becomes the pod's advertised scrape port (mclabels.prometheus.port).
+      port: 2021
+      # -- Fluent Bit filter entries (tpl-rendered) that derive metrics from the access log, spliced into the sidecar's `pipeline.filters`. Replacing this replaces both defaults. WARNING: never label by high-cardinality fields (path, query, client IP, user-agent) — it can OOM the sidecar.
+      # @default -- per-status-code counter + request_time histogram (see values.yaml)
+      filters:
+        # Per-status-code response counter (status_code is bounded, safe to label). Named
+        # responses_total, not requests_total: the scraped exporter already publishes an
+        # unlabelled nginx_http_requests_total, and two same-named families on one endpoint
+        # make Prometheus reject the whole scrape.
+        - name: log_to_metrics
+          match: nginx.access
+          tag: nginx.metrics
+          metric_mode: counter
+          metric_namespace: nginx
+          metric_subsystem: http
+          metric_name: responses_total
+          metric_description: Total nginx HTTP responses by status code
+          add_label: status_code $Attributes['http.response.status_code']
+        # Buckets default to Prometheus's standard set.
+        - name: log_to_metrics
+          match: nginx.access
+          tag: nginx.metrics
+          metric_mode: histogram
+          metric_namespace: nginx
+          metric_subsystem: http
+          metric_name: request_duration_seconds
+          metric_description: nginx request processing time in seconds
+          value_field: $Attributes['mapcolonies.request_time']
+  errorLog:
+    # -- Ship nginx error logs through a separate Fluent Bit pipeline (syslog input, plaintext parser, severity filter, OTLP output). Independent of the access-log pipeline. Only takes effect when fluentbit.enabled is also true.
+    enabled: true
+    # -- UDP port on loopback where Fluent Bit's error-log syslog input listens and to which nginx forwards its error log. Distinct from accessLog.syslogPort.
+    syslogPort: 5515
+    # -- Forward error-log records at or above this severity, applied natively by nginx's error_log directive (records below never leave nginx). Ordering: debug < info < notice < warn < error < crit < alert < emerg. The OSS image cannot emit `debug` (needs a debug-enabled build).
+    minLevel: warn
+  lua:
+    # -- Run a custom Lua script over the access-log records — anything the chart's own values cannot express. Mounted at /fluent-bit/scripts/custom.lua and invoked at each position named under `calls`. Off by default; enabling it without naming a call fails the render.
+    enabled: false
+    # -- Inline Lua script (tpl-rendered, so it can reference `.Release.Name`, chart values, etc.) carried on the chart's own ConfigMap. One script serves both calls. Mutually exclusive with `configMap`; enabling the hook without exactly one source fails the render.
+    script: ""
+    configMap:
+      # -- Name of an existing ConfigMap in the release namespace holding the script, mounted instead of `script` — for a script maintained outside this release. Editing it does not restart the sidecar (only the chart's own ConfigMap is checksummed into the pod template) and the mount is a subPath, which never updates in place: restart the pod to pick up a change. Empty means use `script`.
+      name: ""
+      # -- Key in that ConfigMap whose value is the script. Required when `name` is set.
+      key: ""
+    calls:
+      # -- Global function invoked on every record that survived the parse guard and the exclude grep, before the metrics filters — the only position whose added fields `accessLog.metrics.filters` can reference. Sees every status code, not just the forwarded ones, and runs before query-parameter masking, so it handles unmasked query strings. Empty disables this position.
+      allRecords: ""
+      # -- Global function invoked after the forwarding grep, on the records selected for shipping only — cheaper than `allRecords`, but too late to feed metrics. `record["Attributes"]` is still reachable. Empty disables this position.
+      forwardedOnly: ""
+  debug:
+    # -- Print the log stream to the sidecar's own stdout (`kubectl logs <pod> -c fluent-bit`). Prints the records handed to the OTLP output; `stages` add earlier snapshots. Off by default — it prints every record the sidecar handles.
+    enabled: false
+    # -- Fluent Bit's service log level while debug is enabled. `debug` reports plugin-level decisions, `trace` is extremely verbose. When debug is disabled the level is always `info`.
+    logLevel: info
+    stages:
+      # -- Dump records as they arrive from nginx, before the body is decoded. Answers "is nginx delivering anything, and is the syslog envelope what Fluent Bit expects" — the only stage that shows lines the parser later rejects.
+      received: false
+      # -- Dump records once the body is decoded, before the metrics and forwarding filters. Shows the fields the rest of the pipeline sees; a record still holding a raw `message` means the decode failed.
+      parsed: true
 
 authorization:
   # -- Use authroization mechanism

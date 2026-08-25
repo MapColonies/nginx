@@ -35,7 +35,16 @@ spec:
         {{- if .Values.additionalPodAnnotations }}
         {{- toYaml .Values.additionalPodAnnotations | nindent 8 }}
         {{- end }}
-        {{- include "mclabels.annotations" . | nindent 8 }}
+        {{- if .Values.resetOnConfigChange }}
+        # Roll the pods when any mounted config changes. ConfigMap updates are not picked
+        # up by a running nginx or Fluent Bit, so without this an upgrade that only edits
+        # config leaves the old config live until something else restarts the pod.
+        checksum/base-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- if .Values.fluentbit.enabled }}
+        checksum/fluentbit-config: {{ include (print $.Template.BasePath "/fluentbit-configmap.yaml") . | sha256sum }}
+        {{- end }}
+        {{- end }}
+        {{- include "nginx.mclabels.annotations" . | nindent 8 }}
     spec:
     {{- if $cloudProviderImagePullSecretName }}
       imagePullSecrets:
@@ -43,11 +52,21 @@ spec:
     {{- end }}
       volumes:
         - name: nginx-base-config
-          configMap:	
+          configMap:
             name: {{ printf "%s-base-configmap" (include "nginx.fullname" .) }}
           {{- if .Values.extraVolumes }}
             {{ tpl (toYaml .Values.extraVolumes) . | nindent 8 }}
           {{- end }}
+        {{- if .Values.fluentbit.enabled }}
+        - name: fluentbit-config
+          configMap:
+            name: {{ printf "%s-fluentbit-configmap" (include "nginx.fullname" .) }}
+        {{- if and .Values.fluentbit.lua.enabled (eq (include "nginx.fluentbit.luaSource" .) "configMap") }}
+        - name: fluentbit-lua
+          configMap:
+            name: {{ tpl .Values.fluentbit.lua.configMap.name . }}
+        {{- end }}
+        {{- end }}
       containers:
         - name: nginx
           {{- with .Values.image }}
@@ -97,8 +116,8 @@ spec:
             - name: http
               containerPort: {{ $prometheusExporterPort }}
               protocol: TCP
-          # Note: if the Prometheus Exporter container isn't live the entire Pod
-          # (including the NGINX container) will restart
+          # Note: a livenessProbe failure restarts only this container, not the whole
+          # Pod — the NGINX container keeps serving traffic while the exporter restarts.
           livenessProbe:
             initialDelaySeconds: {{ .Values.initialDelaySeconds }}
             httpGet:
@@ -109,6 +128,9 @@ spec:
             {{- toYaml .Values.prometheusExporter.resources.value | nindent 12 }}
           {{- end }}
           {{- end }}
+        {{- if .Values.fluentbit.enabled }}
+        {{- include "nginx.fluentbit.container" . | nindent 8 }}
+        {{- end }}
         {{- if .Values.sidecars }}
         {{ tpl (.Values.sidecars) . | nindent 8 }}
         {{- end }}
