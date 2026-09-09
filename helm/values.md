@@ -78,7 +78,7 @@ A Helm chart for nginx
 | global.tracing | object | `{}` | Configuration for distributed tracing. |
 | image.repository | string | `"common/nginx"` | Docker image name |
 | image.tag | string | `""` | Docker image tag. If no value is specified, appVersion will be taken. |
-| imagePullPolicy | string | `"Always"` | Image pull policy for all containers in the deployment |
+| imagePullPolicy | string | `"IfNotPresent"` | Image pull policy for all containers in the deployment |
 | ingress.additionalAnnotations | string | `nil` | Additional annotations for ingress |
 | ingress.domain | string | `""` | Domain of ingress |
 | ingress.enabled | bool | `false` | Expose NGINX as an Ingress |
