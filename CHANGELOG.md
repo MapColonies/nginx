@@ -1,5 +1,23 @@
 # Changelog
 
+## [2.5.0](https://github.com/MapColonies/nginx/compare/v2.4.0...v2.5.0) (2026-09-17)
+
+
+### Features
+
+* **auth:** export opaDenyReason for reuse by dependent gateways ([#65](https://github.com/MapColonies/nginx/issues/65)) ([82fdd63](https://github.com/MapColonies/nginx/commit/82fdd6381526309e2e3858c1f3193ca8fee3ad2a))
+* changed configmaps from single line to multiline ([#62](https://github.com/MapColonies/nginx/issues/62)) ([fa59b3a](https://github.com/MapColonies/nginx/commit/fa59b3a8e373d088a6fd36d3c5d3c6261b0b1dbe))
+
+
+### Bug Fixes
+
+* changed resource ratio to be compatible ([#63](https://github.com/MapColonies/nginx/issues/63)) ([0678647](https://github.com/MapColonies/nginx/commit/0678647f360243f8250ed1e0d9c297a21edb8fe0))
+
+
+### Helm Changes
+
+* set imagePullPolicy default to IfNotPresent ([#61](https://github.com/MapColonies/nginx/issues/61)) ([4e85d9a](https://github.com/MapColonies/nginx/commit/4e85d9ad3d0f7eaf8fdd7a0334ac27731f4d66d5))
+
 ## [2.4.0](https://github.com/MapColonies/nginx/compare/v2.3.1...v2.4.0) (2026-08-25)
 
 
