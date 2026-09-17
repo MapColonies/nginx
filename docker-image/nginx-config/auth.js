@@ -84,7 +84,6 @@ function buildOpaBody(r) {
 }
 
 // Normalizes a denied OPA result's `reason` (string) or `reasons` (array) into one message.
-// Exported so gateways with their own OPA handler parse denials the same way.
 function opaDenyReason(opaResult) {
   if (opaResult.reason) {
     return opaResult.reason;
