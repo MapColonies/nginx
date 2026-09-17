@@ -66,7 +66,7 @@ A Helm chart for nginx
 | fluentbit.output.logs.port | int | `4318` | Port of the central Alloy OTLP/HTTP logs endpoint. |
 | fluentbit.output.logs.protocol | string | `"http"` | Protocol used to reach the OTLP logs endpoint (http or https). |
 | fluentbit.resources.enabled | bool | `true` | Enable or disable resource limits and requests for the Fluent Bit sidecar |
-| fluentbit.resources.value.limits.cpu | string | `"100m"` | CPU limit for the Fluent Bit sidecar |
+| fluentbit.resources.value.limits.cpu | string | `"400m"` | CPU limit for the Fluent Bit sidecar |
 | fluentbit.resources.value.limits.memory | string | `"128Mi"` | Memory limit for the Fluent Bit sidecar |
 | fluentbit.resources.value.requests.cpu | string | `"100m"` | CPU request for the Fluent Bit sidecar |
 | fluentbit.resources.value.requests.memory | string | `"128Mi"` | Memory request for the Fluent Bit sidecar |
@@ -117,16 +117,16 @@ A Helm chart for nginx
 | prometheusExporter.image.repository | string | `"common/nginx-prometheus-exporter"` | Docker image name for the Prometheus exporter |
 | prometheusExporter.image.tag | string | `"1.5.1"` | Docker image tag for the Prometheus exporter |
 | prometheusExporter.resources.enabled | bool | `true` | Enable or disable resource limits and requests |
-| prometheusExporter.resources.value.limits.cpu | string | `"100m"` | CPU limit for the main container |
+| prometheusExporter.resources.value.limits.cpu | string | `"300m"` | CPU limit for the main container |
 | prometheusExporter.resources.value.limits.memory | string | `"128Mi"` | Memory limit for the main container |
-| prometheusExporter.resources.value.requests.cpu | string | `"100m"` | CPU request for the main container |
+| prometheusExporter.resources.value.requests.cpu | string | `"75m"` | CPU request for the main container |
 | prometheusExporter.resources.value.requests.memory | string | `"128Mi"` | Memory request for the main container |
 | replicaCount | int | `1` | Number of replicas to deploy |
 | resetOnConfigChange | bool | `true` | If true, triggers a rolling update when the configuration changes |
 | resources.enabled | bool | `true` | Use custom resources |
-| resources.value.limits.cpu | string | `"100m"` | Pod CPU limit |
+| resources.value.limits.cpu | string | `"300m"` | Pod CPU limit |
 | resources.value.limits.memory | string | `"128Mi"` | Pod memory limit |
-| resources.value.requests.cpu | string | `"100m"` | Pod CPU request |
+| resources.value.requests.cpu | string | `"75m"` | Pod CPU request |
 | resources.value.requests.memory | string | `"128Mi"` | Pod memory request |
 | route.enabled | bool | `true` | Expose NGINX as an Openshift route |
 | route.rewriteTarget | string | `""` | Rewrite route target |

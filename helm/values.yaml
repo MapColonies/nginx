@@ -74,12 +74,12 @@ resources:
   value:
     limits:
       # -- Pod CPU limit
-      cpu: 100m
+      cpu: 300m
       # -- Pod memory limit
       memory: 128Mi
     requests:
       # -- Pod CPU request
-      cpu: 100m
+      cpu: 75m
       # --Pod memory request
       memory: 128Mi
 
@@ -176,12 +176,12 @@ prometheusExporter:
     value:
       limits:
         # -- CPU limit for the main container
-        cpu: 100m
+        cpu: 300m
         # -- Memory limit for the main container
         memory: 128Mi
       requests:
         # -- CPU request for the main container
-        cpu: 100m
+        cpu: 75m
         # -- Memory request for the main container
         memory: 128Mi
 
@@ -202,7 +202,7 @@ fluentbit:
     value:
       limits:
         # -- CPU limit for the Fluent Bit sidecar
-        cpu: 100m
+        cpu: 400m
         # -- Memory limit for the Fluent Bit sidecar
         memory: 128Mi
       requests:
