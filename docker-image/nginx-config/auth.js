@@ -83,6 +83,17 @@ function buildOpaBody(r) {
   });
 }
 
+// Normalizes a denied OPA result's `reason` (string) or `reasons` (array) into one message.
+function opaDenyReason(opaResult) {
+  if (opaResult.reason) {
+    return opaResult.reason;
+  }
+  if (opaResult.reasons) {
+    return opaResult.reasons.join(", ");
+  }
+  return "Access denied - no reason provided";
+}
+
 async function opaAuth(r) {
   try {
     if (r.variables.original_method == "OPTIONS") {
@@ -100,14 +111,7 @@ async function opaAuth(r) {
 
     const opaResult = JSON.parse(response.responseText).result;
     if (!opaResult.allowed) {
-      let reason;
-      if (opaResult.reason) {
-        reason = opaResult.reason;
-      } else if (opaResult.reasons) {
-        reason = opaResult.reasons.join(", ");
-      } else {
-        reason = "Access denied - no reason provided";
-      }
+      const reason = opaDenyReason(opaResult);
       r.error(reason);
       const returnCode = reason.includes("no token supplied") ? 401 : 403;
 
@@ -153,4 +157,4 @@ function jwtPayloadSub(r) {
   }
 }
 
-export default { opaAuth, jwtPayloadSub, buildOpaBody };
+export default { opaAuth, jwtPayloadSub, buildOpaBody, opaDenyReason };
