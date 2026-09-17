@@ -32,7 +32,7 @@ initialDelaySeconds: 60
 # -- If true, triggers a rolling update when the configuration changes
 resetOnConfigChange: true
 # -- Image pull policy for all containers in the deployment
-imagePullPolicy: Always
+imagePullPolicy: IfNotPresent
 
 # -- String to partially override fullname template (will maintain the release name)
 nameOverride: ""
