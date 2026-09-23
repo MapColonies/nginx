@@ -94,36 +94,52 @@ function opaDenyReason(opaResult) {
   return "Access denied - no reason provided";
 }
 
+// Runs the OPA check and returns a decision without writing any response.
+// The caller owns how the outcome is surfaced (nginx variables vs. response
+// headers) and whether the request terminates, so this can back both the
+// standalone opaAuth handler and gateways that chain further subrequests.
+// Returns one of:
+//   { kind: "options",       allowed: true,  code: 204 }         // no OPA call
+//   { kind: "upstreamError", allowed: false, code: <5xx> }       // OPA >500
+//   { kind: "deny",          allowed: false, code: 401|403, reason }
+//   { kind: "allow",         allowed: true,  code: 204 }
+// Throws on subrequest/parse failure — the caller's catch owns the 500.
+async function opaDecide(r) {
+  if (r.variables.original_method == "OPTIONS") {
+    return { kind: "options", allowed: true, code: 204 };
+  }
+
+  const response = await r.subrequest("/opa", {
+    body: buildOpaBody(r),
+    method: "POST",
+  });
+
+  if (response.status > 500) {
+    return { kind: "upstreamError", allowed: false, code: response.status };
+  }
+
+  const opaResult = JSON.parse(response.responseText).result;
+  if (!opaResult.allowed) {
+    const reason = opaDenyReason(opaResult);
+    const code = reason.includes("no token supplied") ? 401 : 403;
+    return { kind: "deny", allowed: false, code, reason };
+  }
+
+  return { kind: "allow", allowed: true, code: 204 };
+}
+
 async function opaAuth(r) {
   try {
-    if (r.variables.original_method == "OPTIONS") {
-      return r.return(204);
-    }
-
-    const response = await r.subrequest("/opa", {
-      body: buildOpaBody(r),
-      method: "POST",
-    });
-
-    if (response.status > 500) {
-      return r.return(response.status);
-    }
-
-    const opaResult = JSON.parse(response.responseText).result;
-    if (!opaResult.allowed) {
-      const reason = opaDenyReason(opaResult);
-      r.error(reason);
-      const returnCode = reason.includes("no token supplied") ? 401 : 403;
-
+    const decision = await opaDecide(r);
+    if (decision.kind === "deny") {
+      r.error(decision.reason);
       r.variables.opa_result = "false";
-      r.variables.opa_reason = reason;
-      return r.return(returnCode);
+      r.variables.opa_reason = decision.reason;
+    } else if (decision.kind === "allow") {
+      r.variables.opa_result = "true";
+      r.variables.opa_reason = "";
     }
-    r.variables.opa_result = "true";
-
-    r.variables.opa_reason = "";
-
-    r.return(204);
+    return r.return(decision.code);
   } catch (error) {
     r.error(error);
     r.variables.opa_result = "error";
@@ -157,4 +173,4 @@ function jwtPayloadSub(r) {
   }
 }
 
-export default { opaAuth, jwtPayloadSub, buildOpaBody, opaDenyReason };
+export default { opaAuth, opaDecide, jwtPayloadSub, buildOpaBody, opaDenyReason };
