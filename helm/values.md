@@ -6,6 +6,11 @@ A Helm chart for nginx
 
 ## Requirements
 
+| readinessProbe.failureThreshold | int | `3` | Consecutive failures before the pod is marked not ready |
+| readinessProbe.initialDelaySeconds | string | `nil` | Initial delay in seconds before the readiness probe starts. Falls back to the top-level `initialDelaySeconds` when unset |
+| readinessProbe.periodSeconds | int | `10` | How often (in seconds) to perform the readiness probe |
+| readinessProbe.successThreshold | int | `1` | Consecutive successes required to be marked ready |
+| readinessProbe.timeoutSeconds | int | `1` | Seconds after which the readiness probe times out |
 | Repository | Name | Version |
 |------------|------|---------|
 | oci://acrarolibotnonprod.azurecr.io/helm/infra | mclabels | 1.0.1 |
@@ -88,7 +93,7 @@ A Helm chart for nginx
 | ingress.ingressMapping[0].pathType | string | `"Prefix"` | Path Type of ingreaa |
 | ingress.tls.enabled | bool | `false` | Use ingress over HTTPS |
 | ingress.tls.secretName | string | `""` | Secret name of ingress that points to the relevant custom certificates |
-| initialDelaySeconds | int | `60` | Initial delay in seconds before the readiness probe starts |
+| initialDelaySeconds | int | `60` | Initial delay in seconds before the probes start. Used by the prometheus exporter, and as the fallback for the nginx probes when their own `initialDelaySeconds` is unset |
 | mclabels.component | string | `"proxy-server"` |  |
 | mclabels.environment | string | `"development"` |  |
 | mclabels.logScraping | bool | `true` |  |
@@ -96,6 +101,11 @@ A Helm chart for nginx
 | mclabels.partOf | string | `"nginx"` |  |
 | mclabels.prometheus.enabled | bool | `true` |  |
 | mclabels.prometheus.port | int | `9113` |  |
+| livenessProbe.failureThreshold | int | `3` | Consecutive failures before the container is restarted |
+| livenessProbe.initialDelaySeconds | string | `nil` | Initial delay in seconds before the liveness probe starts. Falls back to the top-level `initialDelaySeconds` when unset |
+| livenessProbe.periodSeconds | int | `10` | How often (in seconds) to perform the liveness probe |
+| livenessProbe.successThreshold | int | `1` | Consecutive successes required to be considered healthy again after a failure (must be 1 for liveness) |
+| livenessProbe.timeoutSeconds | int | `1` | Seconds after which the liveness probe times out |
 | nameOverride | string | `""` | String to partially override fullname template (will maintain the release name) |
 | nginx.allowedHeaders | string | `nil` | Allowed headers, default: * (comma-seperated, for the header: Access-Control-Allow-Headers) |
 | nginx.allowedMethods | string | `nil` | Allowed methods, default: GET, OPTIONS (comma-seperated, for the header: Access-Control-Allow-Methods) |

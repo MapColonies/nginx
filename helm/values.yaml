@@ -27,8 +27,31 @@ enabled: true
 environment: development
 # -- Number of replicas to deploy
 replicaCount: 1
-# -- Initial delay in seconds before the readiness probe starts
+# -- Initial delay in seconds before the probes start. Used by the prometheus exporter, and as the fallback for the nginx probes when their own `initialDelaySeconds` is unset
 initialDelaySeconds: 60
+# Probes of the nginx container (both hit /nginx_status on the status port)
+livenessProbe:
+  # -- Initial delay in seconds before the liveness probe starts. Falls back to the top-level `initialDelaySeconds` when unset
+  initialDelaySeconds:
+  # -- How often (in seconds) to perform the liveness probe
+  periodSeconds: 10
+  # -- Seconds after which the liveness probe times out
+  timeoutSeconds: 1
+  # -- Consecutive failures before the container is restarted
+  failureThreshold: 3
+  # -- Consecutive successes required to be considered healthy again after a failure (must be 1 for liveness)
+  successThreshold: 1
+readinessProbe:
+  # -- Initial delay in seconds before the readiness probe starts. Falls back to the top-level `initialDelaySeconds` when unset
+  initialDelaySeconds:
+  # -- How often (in seconds) to perform the readiness probe
+  periodSeconds: 10
+  # -- Seconds after which the readiness probe times out
+  timeoutSeconds: 1
+  # -- Consecutive failures before the pod is marked not ready
+  failureThreshold: 3
+  # -- Consecutive successes required to be marked ready
+  successThreshold: 1
 # -- If true, triggers a rolling update when the configuration changes
 resetOnConfigChange: true
 # -- Image pull policy for all containers in the deployment

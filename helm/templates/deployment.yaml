@@ -97,12 +97,20 @@ spec:
               containerPort: {{ .Values.targetPort }}
               protocol: TCP
           livenessProbe:
-            initialDelaySeconds: {{ .Values.initialDelaySeconds }}
+            initialDelaySeconds: {{ .Values.livenessProbe.initialDelaySeconds | default .Values.initialDelaySeconds }}
+            periodSeconds: {{ .Values.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.livenessProbe.failureThreshold }}
+            successThreshold: {{ .Values.livenessProbe.successThreshold }}
             httpGet:
               path: /nginx_status
               port: {{ .Values.siteStatusPort }}
           readinessProbe:
-            initialDelaySeconds: {{ .Values.initialDelaySeconds }}
+            initialDelaySeconds: {{ .Values.readinessProbe.initialDelaySeconds | default .Values.initialDelaySeconds }}
+            periodSeconds: {{ .Values.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.readinessProbe.failureThreshold }}
+            successThreshold: {{ .Values.readinessProbe.successThreshold }}
             httpGet:
               path: /nginx_status
               port: {{ .Values.siteStatusPort }}
