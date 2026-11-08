@@ -101,6 +101,11 @@ spec:
             httpGet:
               path: /nginx_status
               port: {{ .Values.siteStatusPort }}
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.initialDelaySeconds }}
+            httpGet:
+              path: /nginx_status
+              port: {{ .Values.siteStatusPort }}
           {{- if .Values.resources.enabled }}
           resources:
             {{- toYaml .Values.resources.value | nindent 12 }}
