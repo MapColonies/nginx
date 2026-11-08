@@ -92,7 +92,6 @@ A Helm chart for nginx
 | livenessProbe.failureThreshold | int | `3` | Consecutive failures before the container is restarted |
 | livenessProbe.initialDelaySeconds | string | `nil` | Initial delay in seconds before the liveness probe starts. Falls back to the top-level `initialDelaySeconds` when unset |
 | livenessProbe.periodSeconds | int | `10` | How often (in seconds) to perform the liveness probe |
-| livenessProbe.successThreshold | int | `1` | Consecutive successes required to be considered healthy again after a failure (must be 1 for liveness) |
 | livenessProbe.timeoutSeconds | int | `1` | Seconds after which the liveness probe times out |
 | mclabels.component | string | `"proxy-server"` |  |
 | mclabels.environment | string | `"development"` |  |

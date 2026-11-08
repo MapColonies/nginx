@@ -39,8 +39,6 @@ livenessProbe:
   timeoutSeconds: 1
   # -- Consecutive failures before the container is restarted
   failureThreshold: 3
-  # -- Consecutive successes required to be considered healthy again after a failure (must be 1 for liveness)
-  successThreshold: 1
 readinessProbe:
   # -- Initial delay in seconds before the readiness probe starts. Falls back to the top-level `initialDelaySeconds` when unset
   initialDelaySeconds:
