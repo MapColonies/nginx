@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.6.0](https://github.com/MapColonies/nginx/compare/v2.5.0...v2.6.0) (2026-11-09)
+
+
+### Features
+
+* **helm:** add readiness probe to nginx container MAPCO-11403 ([#68](https://github.com/MapColonies/nginx/issues/68)) ([42bffb0](https://github.com/MapColonies/nginx/commit/42bffb0f6ebf4ae906421bfd6f51d79258a43205))
+
+
+### Bug Fixes
+
+* **cors:** send CORS headers on error responses such as timeouts MAPCO-12582 ([#67](https://github.com/MapColonies/nginx/issues/67)) ([8535b5f](https://github.com/MapColonies/nginx/commit/8535b5f7ef924e31e68cff67efa8b5f64e842de3))
+
 ## [2.5.0](https://github.com/MapColonies/nginx/compare/v2.4.0...v2.5.0) (2026-09-17)
 
 
