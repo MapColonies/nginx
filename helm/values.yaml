@@ -27,8 +27,29 @@ enabled: true
 environment: development
 # -- Number of replicas to deploy
 replicaCount: 1
-# -- Initial delay in seconds before the readiness probe starts
+# -- Initial delay in seconds before the prometheus exporter's liveness probe starts. Also the fallback for `livenessProbe.initialDelaySeconds`
 initialDelaySeconds: 60
+livenessProbe:
+  # -- (int) Initial delay in seconds before the liveness probe starts. Falls back to the top-level `initialDelaySeconds` when unset (`0` is honored)
+  # @default -- the top-level `initialDelaySeconds`
+  initialDelaySeconds:
+  # -- How often (in seconds) to perform the liveness probe
+  periodSeconds: 10
+  # -- Seconds after which the liveness probe times out
+  timeoutSeconds: 1
+  # -- Consecutive failures before the container is restarted
+  failureThreshold: 3
+readinessProbe:
+  # -- Initial delay in seconds before the readiness probe starts
+  initialDelaySeconds: 5
+  # -- How often (in seconds) to perform the readiness probe
+  periodSeconds: 10
+  # -- Seconds after which the readiness probe times out
+  timeoutSeconds: 1
+  # -- Consecutive failures before the pod is marked not ready
+  failureThreshold: 3
+  # -- Consecutive successes required to be marked ready
+  successThreshold: 1
 # -- If true, triggers a rolling update when the configuration changes
 resetOnConfigChange: true
 # -- Image pull policy for all containers in the deployment
