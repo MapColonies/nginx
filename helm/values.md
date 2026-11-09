@@ -137,6 +137,7 @@ A Helm chart for nginx
 | resources.value.limits.memory | string | `"128Mi"` | Pod memory limit |
 | resources.value.requests.cpu | string | `"75m"` | Pod CPU request |
 | resources.value.requests.memory | string | `"128Mi"` | Pod memory request |
+| route.disableCookies | bool | `true` | Stop the OpenShift router adding its sticky-session cookie, which also makes it add `Cache-Control: private` to cacheable responses and pins each client to one pod. Set to false for a backend that needs sticky sessions, such as the GeoServer admin UI with more than one pod. |
 | route.enabled | bool | `true` | Expose NGINX as an Openshift route |
 | route.rewriteTarget | string | `""` | Rewrite route target |
 | route.routesMapping[0] | object | `{"host":null,"path":"/"}` | Path of route |
