@@ -88,9 +88,9 @@ A Helm chart for nginx
 | ingress.ingressMapping[0].pathType | string | `"Prefix"` | Path Type of ingreaa |
 | ingress.tls.enabled | bool | `false` | Use ingress over HTTPS |
 | ingress.tls.secretName | string | `""` | Secret name of ingress that points to the relevant custom certificates |
-| initialDelaySeconds | int | `60` | Initial delay in seconds before the probes start. Used by the prometheus exporter, and as the fallback for the nginx probes when their own `initialDelaySeconds` is unset |
+| initialDelaySeconds | int | `60` | Initial delay in seconds before the prometheus exporter's liveness probe starts. Also the fallback for `livenessProbe.initialDelaySeconds` |
 | livenessProbe.failureThreshold | int | `3` | Consecutive failures before the container is restarted |
-| livenessProbe.initialDelaySeconds | string | `nil` | Initial delay in seconds before the liveness probe starts. Falls back to the top-level `initialDelaySeconds` when unset |
+| livenessProbe.initialDelaySeconds | int | the top-level `initialDelaySeconds` | Initial delay in seconds before the liveness probe starts. Falls back to the top-level `initialDelaySeconds` when unset (`0` is honored) |
 | livenessProbe.periodSeconds | int | `10` | How often (in seconds) to perform the liveness probe |
 | livenessProbe.timeoutSeconds | int | `1` | Seconds after which the liveness probe times out |
 | mclabels.component | string | `"proxy-server"` |  |
@@ -126,7 +126,7 @@ A Helm chart for nginx
 | prometheusExporter.resources.value.requests.cpu | string | `"75m"` | CPU request for the main container |
 | prometheusExporter.resources.value.requests.memory | string | `"128Mi"` | Memory request for the main container |
 | readinessProbe.failureThreshold | int | `3` | Consecutive failures before the pod is marked not ready |
-| readinessProbe.initialDelaySeconds | string | `nil` | Initial delay in seconds before the readiness probe starts. Falls back to the top-level `initialDelaySeconds` when unset |
+| readinessProbe.initialDelaySeconds | int | `5` | Initial delay in seconds before the readiness probe starts |
 | readinessProbe.periodSeconds | int | `10` | How often (in seconds) to perform the readiness probe |
 | readinessProbe.successThreshold | int | `1` | Consecutive successes required to be marked ready |
 | readinessProbe.timeoutSeconds | int | `1` | Seconds after which the readiness probe times out |

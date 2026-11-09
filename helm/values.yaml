@@ -27,11 +27,11 @@ enabled: true
 environment: development
 # -- Number of replicas to deploy
 replicaCount: 1
-# -- Initial delay in seconds before the probes start. Used by the prometheus exporter, and as the fallback for the nginx probes when their own `initialDelaySeconds` is unset
+# -- Initial delay in seconds before the prometheus exporter's liveness probe starts. Also the fallback for `livenessProbe.initialDelaySeconds`
 initialDelaySeconds: 60
-# Probes of the nginx container (both hit /nginx_status on the status port)
 livenessProbe:
-  # -- Initial delay in seconds before the liveness probe starts. Falls back to the top-level `initialDelaySeconds` when unset
+  # -- (int) Initial delay in seconds before the liveness probe starts. Falls back to the top-level `initialDelaySeconds` when unset (`0` is honored)
+  # @default -- the top-level `initialDelaySeconds`
   initialDelaySeconds:
   # -- How often (in seconds) to perform the liveness probe
   periodSeconds: 10
@@ -40,8 +40,8 @@ livenessProbe:
   # -- Consecutive failures before the container is restarted
   failureThreshold: 3
 readinessProbe:
-  # -- Initial delay in seconds before the readiness probe starts. Falls back to the top-level `initialDelaySeconds` when unset
-  initialDelaySeconds:
+  # -- Initial delay in seconds before the readiness probe starts
+  initialDelaySeconds: 5
   # -- How often (in seconds) to perform the readiness probe
   periodSeconds: 10
   # -- Seconds after which the readiness probe times out
