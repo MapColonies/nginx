@@ -350,7 +350,7 @@ route:
     duration: 60s # supported units (us, ms, s, m, h, d)
   # -- Rewrite route target
   rewriteTarget: ""
-  # -- Stop the OpenShift router adding its sticky-session cookie, which also makes it add `Cache-Control: private` to cacheable responses and pins each client to one pod. Set to false for a backend that needs sticky sessions, such as the GeoServer admin UI with more than one pod.
+  # -- Disable the router's sticky-session cookie, which adds `Cache-Control: private` to cacheable responses. Set false for backends that need sticky sessions (GeoServer admin UI with several pods).
   disableCookies: true
   tls:
     # -- Use route over HTTPS
