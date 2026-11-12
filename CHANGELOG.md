@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.1](https://github.com/MapColonies/nginx/compare/v2.6.0...v2.6.1) (2026-11-12)
+
+
+### Build System
+
+* **docker:** bump base image to nginx 1.31.7-alpine3.24-otel(MAPCO-12445) ([#71](https://github.com/MapColonies/nginx/issues/71)) ([3725891](https://github.com/MapColonies/nginx/commit/3725891e03ae13e02425f75ddd9d631774bf565c))
+
 ## [2.6.0](https://github.com/MapColonies/nginx/compare/v2.5.0...v2.6.0) (2026-11-09)
 
 
