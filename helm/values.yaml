@@ -350,6 +350,8 @@ route:
     duration: 60s # supported units (us, ms, s, m, h, d)
   # -- Rewrite route target
   rewriteTarget: ""
+  # -- Disable the router's sticky-session cookie, which adds `Cache-Control: private` to cacheable responses. Set false for backends that need sticky sessions (GeoServer admin UI with several pods).
+  disableCookies: true
   tls:
     # -- Use route over HTTPS
     enabled: true
