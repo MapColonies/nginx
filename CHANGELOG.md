@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.2](https://github.com/MapColonies/nginx/compare/v2.6.1...v2.6.2) (2026-11-22)
+
+
+### Helm Changes
+
+* disable router sticky-session cookie on routes (MAPCO-12584) ([#70](https://github.com/MapColonies/nginx/issues/70)) ([c3ef35d](https://github.com/MapColonies/nginx/commit/c3ef35d7e697dd0cb722558bce5b7a3c712a5cb7))
+
 ## [2.6.1](https://github.com/MapColonies/nginx/compare/v2.6.0...v2.6.1) (2026-11-12)
 
 
